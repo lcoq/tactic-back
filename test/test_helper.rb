@@ -1,10 +1,27 @@
 ENV['RAILS_ENV'] ||= 'test'
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
+require "minitest/rails"
+
+module TestsExtension
+  extend ActiveSupport::Concern
+
+  included do
+    include Rails.application.routes.url_helpers
+
+    before do
+      DatabaseCleaner.start
+    end
+    after do
+      DatabaseCleaner.clean
+    end
+  end
+end
 
 class ActiveSupport::TestCase
-  # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
-  fixtures :all
+  include TestsExtension
+end
 
-  # Add more helper methods to be used by all tests here...
+class ::Minitest::Spec
+  include TestsExtension
 end
