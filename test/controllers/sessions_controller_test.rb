@@ -1,6 +1,19 @@
 require 'test_helper'
 
 describe SessionsController do
+  describe '#show' do
+    it 'is forbidden with invalid Authorization header' do
+      get '/sessions', headers: { 'Authorization' => 'invalid' }
+      assert_response :forbidden
+    end
+    it 'retrieve and serialize the session from the Authorization header when valid' do
+      session = build_session(user: create_user(name: 'louis'), token: 'session-token')
+      assert session.save
+      get '/sessions', headers: { 'Authorization' => 'session-token' }
+      assert_response :success
+      assert_equal serialized(session, SessionSerializer), response.body
+    end
+  end
   describe '#create' do
     let(:user) { create_user(name: 'louis') }
     let(:params) do
@@ -25,7 +38,7 @@ describe SessionsController do
       assert_response :success
       session = Session.find_by(user: user)
       assert session.present?
-      response.body.must_equal serialized(session, SessionSerializer)
+      assert_equal serialized(session, SessionSerializer), response.body
     end
     it 'does not create a session without user' do
       post '/sessions', params: { 'data' => { 'type' => 'session', 'attributes' => {}, 'relationships' => {} } }
