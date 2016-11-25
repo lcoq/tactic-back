@@ -16,6 +16,10 @@ module Factories
 
   factory :user
 
+  factory :session do
+    { token: SecureRandom.uuid }
+  end
+
   private
 
   def build_record(type, attributes)
