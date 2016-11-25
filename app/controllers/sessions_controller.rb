@@ -20,13 +20,4 @@ class SessionsController < ApplicationController
     authorized = %w{ user }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end
-
-  def authenticate
-    token = request.headers['Authorization']
-    @current_session = token.presence && Session.find_by(token: token)
-    unless @current_session
-      render json: {}, status: :forbidden
-      return false
-    end
-  end
 end
