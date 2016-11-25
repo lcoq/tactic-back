@@ -1,0 +1,13 @@
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: tactic_development
+  min_messages: warning
+  pool: 5
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: tactic_test
+  min_messages: error
+  pool: 5
