@@ -18,6 +18,12 @@ describe User do
     subject.name = create_user(name: 'uniqueness-test').name.upcase
     refute subject.valid?
   end
+  it 'destroys its sessions on destroy' do
+    assert subject.save
+    session = create_session(user: subject, token: "token")
+    subject.destroy
+    assert_raises(ActiveRecord::RecordNotFound) { session.reload }
+  end
 
   describe 'Class methods' do
     subject { User }

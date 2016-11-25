@@ -1,5 +1,8 @@
 class User < ApplicationRecord
-  default_scope { order(created_at: :desc) }
+
+  has_many :sessions, dependent: :destroy
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
+
+  default_scope { order(created_at: :desc) }
 end
