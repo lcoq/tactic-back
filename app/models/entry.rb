@@ -1,5 +1,6 @@
 class Entry < ApplicationRecord
   belongs_to :user
+  belongs_to :project, optional: true
 
   validates :started_at, presence: true
   validates :stopped_at, presence: true

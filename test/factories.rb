@@ -24,6 +24,10 @@ module Factories
     { started_at: Time.zone.now - 2.hours, stopped_at: Time.zone.now - 1.hour }
   end
 
+  factory :project do
+    { name: "Tictac" }
+  end
+
   private
 
   def build_record(type, attributes)

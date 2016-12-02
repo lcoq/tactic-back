@@ -20,5 +20,14 @@ describe EntriesController do
       assert_response :success
       assert_equal serialized(entries, EntrySerializer), response.body
     end
+    it 'includes projects' do
+      user = create_user(name: 'louis')
+      session = build_session(user: user).tap { |s| assert s.save }
+      project = create_project(name: 'Tactic')
+      entries = [create_entry(user: user, project: project)]
+      get '/entries', headers: { 'Authorization' => session.token }, params: { 'include' => 'project' }
+      assert_response :success
+      assert_equal serialized(entries, EntrySerializer, include: 'project'), response.body
+    end
   end
 end
