@@ -1,7 +1,6 @@
 class Entry < ApplicationRecord
   belongs_to :user
 
-  validates :user, presence: true
   validates :started_at, presence: true
   validates :stopped_at, presence: true
   validate :stopped_at_is_after_started_at
