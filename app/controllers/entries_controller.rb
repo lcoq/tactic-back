@@ -10,6 +10,12 @@ class EntriesController < ApplicationController
     render json: @entries, include: include_params
   end
 
+  def destroy
+    @entry = Entry.find(params[:id])
+    @entry.destroy
+    render json: @entry
+  end
+
   private
 
   def include_params

@@ -1,11 +1,11 @@
 require 'test_helper'
 
 describe EntriesController do
-  describe '#index' do
-    let(:user) { create_user(name: 'louis') }
-    let(:session) { build_session(user: user).tap { |s| assert s.save } }
-    let(:headers) { { 'Authorization' => session.token } }
+  let(:user) { create_user(name: 'louis') }
+  let(:session) { build_session(user: user).tap { |s| assert s.save } }
+  let(:headers) { { 'Authorization' => session.token } }
 
+  describe '#index' do
     it 'is forbidden with invalid Authorization header' do
       get '/entries', headers: { 'Authorization' => 'invalid' }
       assert_response :forbidden
@@ -45,6 +45,25 @@ describe EntriesController do
         assert_response :success
         assert_equal serialized(current_week_entries, EntrySerializer), response.body
       end
+    end
+  end
+
+  describe '#destroy' do
+    let(:entry) { create_entry(user: user) }
+
+    it 'is forbidden with invalid Authorization header' do
+      delete "/entries/#{entry.id}", headers: { 'Authorization' => 'invalid' }
+      assert_response :forbidden
+    end
+    it 'destroy the entry' do
+      delete "/entries/#{entry.id}", headers: headers
+      assert_response :success
+      assert_raises(ActiveRecord::RecordNotFound) { entry.reload }
+    end
+    it 'serialize the entry' do
+      delete "/entries/#{entry.id}", headers: headers
+      assert_response :success
+      assert_equal serialized(entry, EntrySerializer), response.body
     end
   end
 end
