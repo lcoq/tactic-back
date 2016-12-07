@@ -8,6 +8,7 @@ class Entry < ApplicationRecord
 
   scope :since, ->(date) { where('started_at > ?', date) }
   scope :recent, -> { since(Time.zone.now - 1.month) }
+  scope :in_current_week, -> { since(Time.zone.now.beginning_of_week) }
 
   private
 
