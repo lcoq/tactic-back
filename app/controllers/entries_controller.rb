@@ -10,6 +10,15 @@ class EntriesController < ApplicationController
     render json: @entries, include: include_params
   end
 
+  def update
+    @entry = Entry.find(params[:id])
+    if @entry.update_attributes(update_params)
+      render json: @entry
+    else
+      render json: @entry, status: :unprocessable_entity, serializer: ActiveModel::Serializer::ErrorSerializer
+    end
+  end
+
   def destroy
     @entry = Entry.find(params[:id])
     @entry.destroy
@@ -34,5 +43,10 @@ class EntriesController < ApplicationController
 
   def index_params
     params.permit('include', 'filter' => 'current-week')
+  end
+
+  def update_params
+    authorized = %w{ title started-at stopped-at project }
+    ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end
 end

@@ -23,6 +23,14 @@ describe Entry do
     subject.stopped_at = subject.started_at - 1.second
     refute subject.valid?
   end
+  it 'drop the milliseconds on started at' do
+    subject.started_at = Time.zone.parse("2016-12-07T09:42:04.123Z")
+    assert_equal "2016-12-07T09:42:04.000Z", subject.started_at.as_json
+  end
+  it 'drop the milliseconds on stopped at' do
+    subject.stopped_at = Time.zone.parse("2016-12-07T09:42:04.123Z")
+    assert_equal "2016-12-07T09:42:04.000Z", subject.stopped_at.as_json
+  end
 
   describe 'Class methods' do
     subject { Entry }

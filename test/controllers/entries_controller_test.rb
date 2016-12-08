@@ -48,6 +48,73 @@ describe EntriesController do
     end
   end
 
+  describe '#update' do
+    let(:entry) { create_entry(user: user, title: 'initial entry title') }
+    let(:params) do
+      {
+        'data' => {
+          'type' => 'entries',
+          'attributes' => {
+            'title' => 'updated-title',
+            'started-at' => "2016-12-07T09:42:04.017Z",
+            'stopped-at' => "2016-12-07T09:48:00.017Z"
+          },
+          'relationships' => {
+            'project' => {
+              'data' => {
+                'type' => 'projects',
+                'id' => create_project(name: 'Tictoc').id.to_s
+              }
+            },
+            'user' => {
+              'data' => {
+                'type' => 'users',
+                'id' => user.id.to_s
+              }
+            }
+          }
+        }
+      }
+    end
+
+    it 'is forbidden with invalid Authorization header' do
+      patch "/entries/#{entry.id}", headers: { 'Authorization' => 'invalid' }
+      assert_response :forbidden
+    end
+    it 'update the entry' do
+      patch "/entries/#{entry.id}", headers: headers, params: params
+      assert_response :success
+      entry.reload
+      assert_equal 'updated-title', entry.title
+      assert_equal Time.zone.parse("2016-12-07T09:42:04.017Z").to_i, entry.started_at.to_i
+      assert_equal Time.zone.parse("2016-12-07T09:48:00.017Z").to_i, entry.stopped_at.to_i
+      assert_equal "Tictoc", entry.project.name
+    end
+    it 'serialize the entry' do
+      patch "/entries/#{entry.id}", headers: headers, params: params
+      assert_response :success
+      assert_equal serialized(entry.reload, EntrySerializer), response.body
+    end
+    describe 'With invalid params' do
+      before do
+        params['data']['attributes']['started-at'] = nil
+      end
+      it 'does not update the entry' do
+        patch "/entries/#{entry.id}", headers: headers, params: params
+        assert_response :unprocessable_entity
+        entry.reload
+        assert_equal 'initial entry title', entry.title
+      end
+      it 'serialize the errors' do
+        patch "/entries/#{entry.id}", headers: headers, params: params
+        assert_response :unprocessable_entity
+        parsed = JSON.parse(response.body)
+        parsed['errors'].wont_be_empty
+        assert parsed['errors'].any? { | error| error['source']['pointer'] == '/data/attributes/started-at' }
+      end
+    end
+  end
+
   describe '#destroy' do
     let(:entry) { create_entry(user: user) }
 
