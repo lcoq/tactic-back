@@ -10,6 +10,15 @@ class EntriesController < ApplicationController
     render json: @entries, include: include_params
   end
 
+  def create
+    @entry = Entry.new(user: current_user)
+    if @entry.update_attributes(create_params)
+      render json: @entry
+    else
+      render json: @entry, status: :unprocessable_entity, serializer: ActiveModel::Serializer::ErrorSerializer
+    end
+  end
+
   def update
     @entry = Entry.find(params[:id])
     if @entry.update_attributes(update_params)
@@ -46,6 +55,11 @@ class EntriesController < ApplicationController
   end
 
   def update_params
+    authorized = %w{ title started-at stopped-at project }
+    ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
+  end
+
+  def create_params
     authorized = %w{ title started-at stopped-at project }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end
