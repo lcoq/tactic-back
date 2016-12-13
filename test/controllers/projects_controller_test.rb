@@ -10,12 +10,24 @@ describe ProjectsController do
       get '/projects', headers: { 'Authorization' => 'invalid' }
       assert_response :forbidden
     end
-    it 'serialize projects matching query filter' do
-      create_project name: 'Cuisine'
-      projects = ['Tictac', 'Tactic', 'Tacos'].map { |name| create_project(name: name) }
-      get '/projects', headers: headers, params: { 'filter' => { 'query' => 'tac' } }
+    it 'serialize projects alphabetically ordered' do
+      projects = [
+        create_project(name: 'Tactic'),
+        create_project(name: 'Tictoc'),
+        create_project(name: 'Cuisine')
+      ]
+      get '/projects', headers: headers
       assert_response :success
-      assert_equal serialized(projects, ProjectSerializer), response.body
+      assert_equal serialized(projects.sort_by(&:name), ProjectSerializer), response.body
+    end
+    describe 'With query filter' do
+      it 'serialize projects matching query filter' do
+        create_project name: 'Cuisine'
+        projects = ['Tictac', 'Tactic', 'Tacos'].map { |name| create_project(name: name) }
+        get '/projects', headers: headers, params: { 'filter' => { 'query' => 'tac' } }
+        assert_response :success
+        assert_equal serialized(projects, ProjectSerializer), response.body
+      end
     end
   end
 end
