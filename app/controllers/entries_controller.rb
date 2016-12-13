@@ -4,6 +4,8 @@ class EntriesController < ApplicationController
   def index
     if current_week?
       @entries = Entry.in_current_week.includes(:project, :user)
+    elsif entry_filters?
+      @entries = Entry.filter(entry_filters).includes(:project, :user)
     else
       @entries = current_user.recent_entries.includes(:project)
     end
@@ -47,11 +49,38 @@ class EntriesController < ApplicationController
   end
 
   def current_week_params
-    index_params['filter'] && index_params['filter']['current-week']
+    return unless index_filters
+    index_filters['current-week']
+  end
+
+  def entry_filters?
+    return unless index_filters
+    required = %w{ user-id project-id since before }
+    (required - index_filters.keys).empty?
+  end
+
+  def entry_filters
+    {
+      user_ids: index_filters['user-id'],
+      project_ids: index_filters['project-id'],
+      since: Time.zone.parse(index_filters['since']),
+      before: Time.zone.parse(index_filters['before'])
+    }
+  end
+
+  def index_filters
+    index_params['filter']
   end
 
   def index_params
-    params.permit('include', 'filter' => 'current-week')
+    filters = [
+      'current-week',
+      'since',
+      'before',
+      { 'user-id' => [] },
+      { 'project-id' => [] }
+    ]
+    params.permit('include', 'filter' => filters)
   end
 
   def update_params

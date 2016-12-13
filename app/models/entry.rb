@@ -6,9 +6,14 @@ class Entry < ApplicationRecord
   validates :stopped_at, presence: true
   validate :stopped_at_is_after_started_at
 
+  scope :before, ->(date) { where('started_at <= ?', date) }
   scope :since, ->(date) { where('started_at > ?', date) }
   scope :recent, -> { since(Time.zone.now - 1.month) }
   scope :in_current_week, -> { since(Time.zone.now.beginning_of_week) }
+
+  scope :filter, ->(h) {
+    since(h[:since]).before(h[:before]).where(user_id: h[:user_ids], project_id: h[:project_ids])
+  }
 
   def started_at=(*_)
     super
