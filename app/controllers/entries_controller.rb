@@ -55,14 +55,16 @@ class EntriesController < ApplicationController
 
   def entry_filters?
     return unless index_filters
-    required = %w{ user-id project-id since before }
+    required = %w{ since before }
     (required - index_filters.keys).empty?
   end
 
   def entry_filters
+    project_ids = index_filters['project-id']
+    project_ids << nil if project_ids && project_ids.delete('0')
     {
       user_ids: index_filters['user-id'],
-      project_ids: index_filters['project-id'],
+      project_ids: project_ids,
       since: Time.zone.parse(index_filters['since']),
       before: Time.zone.parse(index_filters['before'])
     }

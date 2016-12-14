@@ -49,24 +49,24 @@ describe Entry do
     end
 
     describe '#filters' do
-      it 'includes entries without project with project_ids 0' do
+      it 'includes entries without project with project_ids nil' do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis)
         subject.filter(
           since: entry.created_at.beginning_of_day,
           before: entry.created_at.end_of_day,
           user_ids: [ louis.id.to_s ],
-          project_ids: ['0']
+          project_ids: [nil]
         ).must_include entry
       end
-      it 'does not include entries without project without project_ids 0' do
+      it 'does not include entries without project without project_ids nil' do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis, project: create_project(name: 'Tactic'))
         subject.filter(
           since: entry.created_at.beginning_of_day,
           before: entry.created_at.end_of_day,
           user_ids: [ louis.id.to_s ],
-          project_ids: ['0']
+          project_ids: [nil]
         ).wont_include entry
       end
     end
