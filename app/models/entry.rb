@@ -12,6 +12,7 @@ class Entry < ApplicationRecord
   scope :in_current_week, -> { since(Time.zone.now.beginning_of_week) }
 
   scope :filter, ->(h) {
+    h[:project_ids] << nil if h[:project_ids].delete('0')
     since(h[:since]).before(h[:before]).where(user_id: h[:user_ids], project_id: h[:project_ids])
   }
 
