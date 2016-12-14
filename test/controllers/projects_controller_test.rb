@@ -122,4 +122,23 @@ describe ProjectsController do
       end
     end
   end
+
+  describe '#destroy' do
+    let(:project) { create_project(name: 'Tactic') }
+
+    it 'is forbidden with invalid Authorization header' do
+      delete "/projects/#{project.id}", headers: { 'Authorization' => 'invalid' }
+      assert_response :forbidden
+    end
+    it 'destroy the project' do
+      delete "/projects/#{project.id}", headers: headers
+      assert_response :success
+      assert_raises(ActiveRecord::RecordNotFound) { project.reload }
+    end
+    it 'serialize the project' do
+      delete "/projects/#{project.id}", headers: headers
+      assert_response :success
+      assert_equal serialized(project, ProjectSerializer), response.body
+    end
+  end
 end
