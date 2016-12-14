@@ -19,6 +19,15 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def update
+    @project = Project.find(params[:id])
+    if @project.update_attributes(update_params)
+      render json: @project
+    else
+      render_record_error @project
+    end
+  end
+
   private
 
   def query_params
@@ -34,6 +43,11 @@ class ProjectsController < ApplicationController
   end
 
   def create_params
+    authorized = %w{ name }
+    ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
+  end
+
+  def update_params
     authorized = %w{ name }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end

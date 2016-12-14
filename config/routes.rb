@@ -3,5 +3,5 @@ Rails.application.routes.draw do
   resources :users, only: :index
   resources :sessions, only: :create
   resources :entries, only: %i{ index create update destroy }
-  resources :projects, only: %i{ index create }
+  resources :projects, only: %i{ index create update }
 end

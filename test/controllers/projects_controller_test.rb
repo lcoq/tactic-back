@@ -75,4 +75,51 @@ describe ProjectsController do
       end
     end
   end
+
+  describe '#update' do
+    let(:project) { create_project(name: 'Tactic') }
+    let(:params) do
+      {
+        'data' => {
+          'type' => 'projects',
+          'attributes' => {
+            'name' => 'Tictac'
+          }
+        }
+      }
+    end
+
+    it 'is forbidden with invalid Authorization header' do
+      patch "/projects/#{project.id}", headers: { 'Authorization' => 'invalid' }
+      assert_response :forbidden
+    end
+    it 'update the project' do
+      patch "/projects/#{project.id}", headers: headers, params: params
+      assert_response :success
+      project.reload
+      assert_equal 'Tictac', project.name
+    end
+    it 'serialize the project' do
+      patch "/projects/#{project.id}", headers: headers, params: params
+      assert_response :success
+      project.reload
+      assert_equal serialized(project, ProjectSerializer), response.body
+    end
+    describe 'With invalid params' do
+      before do
+        params['data']['attributes']['name'] = nil
+      end
+      it 'does not update the project' do
+        patch "/projects/#{project.id}", headers: headers, params: params
+        assert_response :unprocessable_entity
+      end
+      it 'serialize the errors' do
+        patch "/projects/#{project.id}", headers: headers, params: params
+        assert_response :unprocessable_entity
+        parsed = JSON.parse(response.body)
+        parsed['errors'].wont_be_empty
+        assert parsed['errors'].any? { | error| error['source']['pointer'] == '/data/attributes/name' }
+      end
+    end
+  end
 end
