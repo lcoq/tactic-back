@@ -17,7 +17,7 @@ class EntriesController < ApplicationController
     if @entry.update_attributes(create_params)
       render json: @entry
     else
-      render json: @entry, status: :unprocessable_entity, serializer: ActiveModel::Serializer::ErrorSerializer
+      render_record_error @entry
     end
   end
 
@@ -26,7 +26,7 @@ class EntriesController < ApplicationController
     if @entry.update_attributes(update_params)
       render json: @entry
     else
-      render json: @entry, status: :unprocessable_entity, serializer: ActiveModel::Serializer::ErrorSerializer
+      render_record_error @entry
     end
   end
 

@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
     if @session.save
       render json: @session
     else
-      render json: @session, status: :unprocessable_entity, serializer: ActiveModel::Serializer::ErrorSerializer
+      render_record_error @session
     end
   end
 

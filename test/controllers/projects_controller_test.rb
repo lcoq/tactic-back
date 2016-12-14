@@ -30,4 +30,49 @@ describe ProjectsController do
       end
     end
   end
+
+  describe '#create' do
+    let(:params) do
+      {
+        'data' => {
+          'type' => 'projects',
+          'attributes' => {
+            'name' => 'Tictac'
+          }
+        }
+      }
+    end
+
+    it 'is forbidden with invalid Authorization header' do
+      post "/projects", headers: { 'Authorization' => 'invalid' }
+      assert_response :forbidden
+    end
+    it 'create the project' do
+      post "/projects", headers: headers, params: params
+      assert_response :success
+      assert Project.find_by(name: 'Tictac')
+    end
+    it 'serialize the project' do
+      post "/projects", headers: headers, params: params
+      assert_response :success
+      project = Project.find_by(name: 'Tictac')
+      assert_equal serialized(project, ProjectSerializer), response.body
+    end
+    describe 'With invalid params' do
+      before do
+        params['data']['attributes']['name'] = nil
+      end
+      it 'does not create the project' do
+        post "/projects", headers: headers, params: params
+        assert_response :unprocessable_entity
+      end
+      it 'serialize the errors' do
+        post "/projects", headers: headers, params: params
+        assert_response :unprocessable_entity
+        parsed = JSON.parse(response.body)
+        parsed['errors'].wont_be_empty
+        assert parsed['errors'].any? { | error| error['source']['pointer'] == '/data/attributes/name' }
+      end
+    end
+  end
 end

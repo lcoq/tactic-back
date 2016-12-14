@@ -10,6 +10,15 @@ class ProjectsController < ApplicationController
     render json: @projects
   end
 
+  def create
+    @project = Project.new
+    if @project.update_attributes(create_params)
+      render json: @project
+    else
+      render_record_error @project
+    end
+  end
+
   private
 
   def query_params
@@ -22,5 +31,10 @@ class ProjectsController < ApplicationController
 
   def index_params
     params.permit('filter' => 'query')
+  end
+
+  def create_params
+    authorized = %w{ name }
+    ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end
 end
