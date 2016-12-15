@@ -10,6 +10,12 @@ describe ProjectsController do
       get '/projects', headers: { 'Authorization' => 'invalid' }
       assert_response :forbidden
     end
+    it 'does not serialize archived projects' do
+      create_project(name: 'Archived', archived: true)
+      get '/projects', headers: headers
+      assert_response :success
+      assert_equal serialized([], ProjectSerializer), response.body
+    end
     it 'serialize projects alphabetically ordered' do
       projects = [
         create_project(name: 'Tactic'),
@@ -27,6 +33,12 @@ describe ProjectsController do
         get '/projects', headers: headers, params: { 'filter' => { 'query' => 'tac' } }
         assert_response :success
         assert_equal serialized(projects, ProjectSerializer), response.body
+      end
+      it 'does not serialize archived projects matching query filter' do
+        project = create_project(name: 'Archived', archived: true)
+        get '/projects', headers: headers, params: { 'filter' => { 'query' => project.name } }
+        assert_response :success
+        assert_equal serialized([], ProjectSerializer), response.body
       end
     end
   end
@@ -130,10 +142,11 @@ describe ProjectsController do
       delete "/projects/#{project.id}", headers: { 'Authorization' => 'invalid' }
       assert_response :forbidden
     end
-    it 'destroy the project' do
+    it 'archive the project' do
       delete "/projects/#{project.id}", headers: headers
       assert_response :success
-      assert_raises(ActiveRecord::RecordNotFound) { project.reload }
+      project.reload
+      assert project.archived
     end
     it 'serialize the project' do
       delete "/projects/#{project.id}", headers: headers

@@ -3,9 +3,9 @@ class ProjectsController < ApplicationController
 
   def index
     if query?
-      @projects = Project.search_by_name(query_params)
+      @projects = Project.active.search_by_name(query_params)
     else
-      @projects = Project.order(:name)
+      @projects = Project.active.order(:name)
     end
     render json: @projects
   end
@@ -30,7 +30,7 @@ class ProjectsController < ApplicationController
 
   def destroy
     @project = Project.find(params[:id])
-    @project.destroy
+    @project.archive
     render json: @project
   end
 
