@@ -3,9 +3,9 @@ class ProjectsController < ApplicationController
 
   def index
     if query?
-      @projects = Project.active.search_by_name(query_params)
+      @projects = Project.active.search_by_name(query_params).includes(:client)
     else
-      @projects = Project.active.order(:name)
+      @projects = Project.active.order(:name).includes(:client)
     end
     render json: @projects, include: include_params
   end

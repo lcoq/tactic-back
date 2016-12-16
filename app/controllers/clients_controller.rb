@@ -2,7 +2,7 @@ class ClientsController < ApplicationController
   before_action :authenticate
 
   def index
-    @clients = Client.active.order(:name)
+    @clients = Client.active.order(:name).includes(:projects)
     render json: @clients, include: include_params
   end
 
