@@ -18,6 +18,13 @@ describe Project do
     subject.name = create_project(name: 'uniqueness-test').name.upcase
     refute subject.valid?
   end
+  describe '#archive' do
+    it 'archives and save the project' do
+      assert subject.save
+      subject.archive
+      assert subject.reload.archived
+    end
+  end
   describe '#destroy' do
     it 'clears its references on entries' do
       assert subject.save

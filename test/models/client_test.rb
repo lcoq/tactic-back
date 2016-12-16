@@ -18,6 +18,19 @@ describe Client do
     subject.name = create_client(name: 'uniqueness-test').name.upcase
     refute subject.valid?
   end
+  describe '#archive' do
+    it 'archive and save the client' do
+      assert subject.save
+      subject.archive
+      assert subject.reload.archived
+    end
+    it 'archive its projects' do
+      assert subject.save
+      project = create_project(name: 'Tactic', client: subject)
+      subject.archive
+      assert project.reload.archived
+    end
+  end
   describe '#destroy' do
     it 'clears its references on projects' do
       assert subject.save
