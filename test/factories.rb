@@ -28,6 +28,10 @@ module Factories
     { name: "Tictac" }
   end
 
+  factory :client do
+    { name: "Client" }
+  end
+
   private
 
   def build_record(type, attributes)

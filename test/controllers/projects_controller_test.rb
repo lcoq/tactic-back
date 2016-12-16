@@ -26,6 +26,13 @@ describe ProjectsController do
       assert_response :success
       assert_equal serialized(projects.sort_by(&:name), ProjectSerializer), response.body
     end
+    it 'includes clients' do
+      client = create_client(name: 'Productivity')
+      projects = [create_project(name: 'Tactic')]
+      get '/projects', headers: headers, params: { 'include' => 'client' }
+      assert_response :success
+      assert_equal serialized(projects, ProjectSerializer, include: 'client'), response.body
+    end
     describe 'With query filter' do
       it 'serialize projects matching query filter' do
         create_project name: 'Cuisine'
@@ -44,12 +51,21 @@ describe ProjectsController do
   end
 
   describe '#create' do
+    let(:client) { create_client(name: 'Productivity') }
     let(:params) do
       {
         'data' => {
           'type' => 'projects',
           'attributes' => {
             'name' => 'Tictac'
+          },
+          'relationships' => {
+            'client' => {
+              'data' => {
+                'type' => 'clients',
+                'id' => client.id.to_s
+              }
+            }
           }
         }
       }
@@ -62,7 +78,9 @@ describe ProjectsController do
     it 'create the project' do
       post "/projects", headers: headers, params: params
       assert_response :success
-      assert Project.find_by(name: 'Tictac')
+      project = Project.find_by(name: 'Tictac')
+      assert project
+      assert_equal client, project.client
     end
     it 'serialize the project' do
       post "/projects", headers: headers, params: params
@@ -90,12 +108,21 @@ describe ProjectsController do
 
   describe '#update' do
     let(:project) { create_project(name: 'Tactic') }
+    let(:client) { create_client(name: 'Productivity') }
     let(:params) do
       {
         'data' => {
           'type' => 'projects',
           'attributes' => {
             'name' => 'Tictac'
+          },
+          'relationships' => {
+            'client' => {
+              'data' => {
+                'type' => 'clients',
+                'id' => client.id.to_s
+              }
+            }
           }
         }
       }
@@ -110,6 +137,7 @@ describe ProjectsController do
       assert_response :success
       project.reload
       assert_equal 'Tictac', project.name
+      assert_equal client, project.client
     end
     it 'serialize the project' do
       patch "/projects/#{project.id}", headers: headers, params: params

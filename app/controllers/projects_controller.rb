@@ -7,7 +7,7 @@ class ProjectsController < ApplicationController
     else
       @projects = Project.active.order(:name)
     end
-    render json: @projects
+    render json: @projects, include: include_params
   end
 
   def create
@@ -44,17 +44,23 @@ class ProjectsController < ApplicationController
     query_params
   end
 
+  def include_params
+    authorized = %w{ client }
+    include = index_params['include']
+    include if include.present? && (include.split(',') - authorized).empty?
+  end
+
   def index_params
-    params.permit('filter' => 'query')
+    params.permit('include', 'filter' => 'query')
   end
 
   def create_params
-    authorized = %w{ name }
+    authorized = %w{ name client }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end
 
   def update_params
-    authorized = %w{ name }
+    authorized = %w{ name client }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end
 end
