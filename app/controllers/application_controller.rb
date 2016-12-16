@@ -13,4 +13,10 @@ class ApplicationController < ActionController::API
   def current_user
     @current_session.user
   end
+
+  private
+
+  def render_record_error(object)
+    render json: object, status: :unprocessable_entity, serializer: ActiveModel::Serializer::ErrorSerializer
+  end
 end
