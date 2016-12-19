@@ -59,10 +59,11 @@ describe User do
   describe 'Class methods' do
     subject { User }
 
-    it 'default scope orders by created at desc' do
-      old_user = create_user(name: 'louis').tap { |u| u.update_column(:created_at, Time.zone.now - 2.hours) }
-      new_user = create_user(name: 'adrien').tap { |u| u.update_column(:created_at, Time.zone.now) }
-      subject.all.must_equal [new_user, old_user]
+    it 'default scope orders alphabetically' do
+      louis = create_user(name: 'louis')
+      adrien = create_user(name: 'adrien')
+      ingrid = create_user(name: 'ingrid')
+      subject.all.must_equal [ adrien, ingrid, louis ]
     end
   end
 end

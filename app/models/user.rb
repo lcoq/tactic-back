@@ -5,7 +5,7 @@ class User < ApplicationRecord
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
 
-  default_scope { order(created_at: :desc) }
+  default_scope { order(:name) }
 
   def recent_entries
     entries.recent
