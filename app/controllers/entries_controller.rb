@@ -3,13 +3,22 @@ class EntriesController < ApplicationController
 
   def index
     if current_week?
-      @entries = Entry.in_current_week.includes(:project, :user)
+      @entries = Entry.in_current_week.stopped.includes(:project, :user)
     elsif entry_filters?
-      @entries = Entry.filter(entry_filters).includes(:project, :user)
+      @entries = Entry.filter(entry_filters).stopped.includes(:project, :user)
     else
-      @entries = current_user.recent_entries.includes(:project)
+      @entries = current_user.recent_entries.stopped.includes(:project, :user)
     end
-    render json: @entries, include: include_params
+    render json: @entries, include: index_include_params
+  end
+
+  def running
+    @entry = current_user.running_entry
+    if @entry
+      render json: @entry, include: running_include_params
+    else
+      render json: { data: nil }
+    end
   end
 
   def create
@@ -38,7 +47,7 @@ class EntriesController < ApplicationController
 
   private
 
-  def include_params
+  def index_include_params
     authorized = %w{ project }
     include = index_params['include']
     include if include.present? && (include.split(',') - authorized).empty?
@@ -82,6 +91,17 @@ class EntriesController < ApplicationController
       { 'user-id' => [] },
       { 'project-id' => [] }
     ]
+    params.permit('include', 'filter' => filters)
+  end
+
+  def running_include_params
+    authorized = %w{ project }
+    include = running_params['include']
+    include if include.present? && (include.split(',') - authorized).empty?
+  end
+
+  def running_params
+    filters = [ 'running' ]
     params.permit('include', 'filter' => filters)
   end
 

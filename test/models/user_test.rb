@@ -41,6 +41,16 @@ describe User do
       assert_equal [], subject.recent_entries
     end
   end
+  describe '#running_entry' do
+    before { assert subject.save }
+    it 'nil without running entry' do
+      refute subject.running_entry
+    end
+    it 'is the running entry' do
+      running = create_entry(user: subject, stopped_at: nil)
+      assert_equal running, subject.running_entry
+    end
+  end
   describe '#destroy' do
     it 'destroys its sessions on destroy' do
       assert subject.save

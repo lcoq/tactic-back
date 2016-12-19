@@ -15,12 +15,17 @@ describe Entry do
     subject.started_at = nil
     refute subject.valid?
   end
-  it 'needs a stopped at' do
+  it 'stopped at is optional' do
     subject.stopped_at = nil
-    refute subject.valid?
+    assert subject.valid?
   end
   it 'stopped at is after started at' do
     subject.stopped_at = subject.started_at - 1.second
+    refute subject.valid?
+  end
+  it 'entry without stopped at is uniq per user' do
+    other = create_entry(user: user, stopped_at: nil)
+    subject.stopped_at = nil
     refute subject.valid?
   end
   it 'drop the milliseconds on started at' do

@@ -22,6 +22,12 @@ describe EntriesController do
       assert_response :success
       assert_equal serialized(entries, EntrySerializer), response.body
     end
+    it 'does not serialize running entry' do
+      entry = create_entry(user: user, stopped_at: nil)
+      get '/entries', headers: headers
+      assert_response :success
+      assert_equal serialized([], EntrySerializer), response.body
+    end
     it 'includes projects' do
       project = create_project(name: 'Tactic')
       entries = [create_entry(user: user, project: project)]
@@ -30,6 +36,9 @@ describe EntriesController do
       assert_equal serialized(entries, EntrySerializer, include: 'project'), response.body
     end
     describe 'With current-week filter' do
+      let(:params) do
+        { 'filter' => { 'current-week' => '1' } }
+      end
       it 'serialize current week entries' do
         other_user = create_user(name: 'adrien')
         current_week_entries = [
@@ -41,9 +50,15 @@ describe EntriesController do
           create_entry(user: user, started_at: Time.zone.now - 1.week - 1.hour, stopped_at: Time.zone.now - 1.week),
           create_entry(user: other_user, started_at: Time.zone.now - 1.week - 1.hour, stopped_at: Time.zone.now - 1.week)
         ]
-        get '/entries', headers: headers, params: { 'filter' => { 'current-week' => '1' } }
+        get '/entries', headers: headers, params: params
         assert_response :success
         assert_equal serialized(current_week_entries, EntrySerializer), response.body
+      end
+      it 'does not serialize running entry' do
+        entry = create_entry(user: user, stopped_at: nil)
+        get '/entries', headers: headers, params: params
+        assert_response :success
+        assert_equal serialized([], EntrySerializer), response.body
       end
     end
     describe 'With user-id, project-id, started-at and stopped-at filters' do
@@ -75,6 +90,49 @@ describe EntriesController do
         assert_response :success
         assert_equal serialized(filtered_entries, EntrySerializer), response.body
       end
+      it 'does not serialize running entries' do
+        adrien = create_user(name: 'adrien')
+        tactic = create_project(name: 'tactic')
+        create_entry(user: adrien, started_at: Time.zone.now - 1.minute, stopped_at: nil, project: tactic)
+
+        filters = {
+          'user-id' => [ adrien.id.to_s ],
+          'project-id' => [ tactic.id.to_s ],
+          'since' => (Time.zone.now - 1.day).beginning_of_day.as_json,
+          'before' => Time.zone.now.end_of_day.as_json
+        }
+        get '/entries', headers: headers, params: { 'filter' => filters }
+        assert_response :success
+        assert_equal serialized([], EntrySerializer), response.body
+      end
+    end
+  end
+
+  describe '#running' do
+    let(:params) do
+      { 'filter' => { 'running' => '1' } }
+    end
+    it 'is forbidden with invalid Authorization header' do
+      get '/entries', headers: { 'Authorization' => 'invalid' }, params: params
+      assert_response :forbidden
+    end
+    it 'serialize nil data when the current user has no running entry' do
+      get '/entries', headers: headers, params: params
+      assert_response :success
+      assert_equal({ 'data' => nil }, JSON.parse(response.body))
+    end
+    it 'serialize the current user running entry' do
+      entry = create_entry(user: user, stopped_at: nil)
+      get '/entries', headers: headers, params: params
+      assert_response :success
+      assert_equal serialized(entry, EntrySerializer), response.body
+    end
+    it 'includes project' do
+      entry = create_entry(user: user, project: create_project(name: 'tactic'), stopped_at: nil)
+      params['include'] = 'project'
+      get '/entries', headers: headers, params: params
+      assert_response :success
+      assert_equal serialized(entry, EntrySerializer, include: 'project'), response.body
     end
   end
 

@@ -3,13 +3,14 @@ class Entry < ApplicationRecord
   belongs_to :project, optional: true
 
   validates :started_at, presence: true
-  validates :stopped_at, presence: true
+  validates :stopped_at, uniqueness: { scope: :user }, if: :running?
   validate :stopped_at_is_after_started_at
 
   scope :before, ->(date) { where('started_at <= ?', date) }
   scope :since, ->(date) { where('started_at > ?', date) }
   scope :recent, -> { since(Time.zone.now - 1.month) }
   scope :in_current_week, -> { since(Time.zone.now.beginning_of_week) }
+  scope :stopped, -> { where.not(stopped_at: nil) }
 
   scope :filter, ->(h) {
     scoped = since(h[:since]).before(h[:before])
@@ -29,6 +30,10 @@ class Entry < ApplicationRecord
   end
 
   private
+
+  def running?
+    stopped_at.blank?
+  end
 
   def stopped_at_is_after_started_at
     if started_at && stopped_at && stopped_at < started_at
