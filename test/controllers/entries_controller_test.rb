@@ -61,6 +61,47 @@ describe EntriesController do
         assert_equal serialized([], EntrySerializer), response.body
       end
     end
+    describe 'With current-week and user-id filter' do
+      let(:params) do
+        { 'filter' => { 'current-week' => '1', 'user-id' => [user.id.to_s] } }
+      end
+      it 'serialize current week entries' do
+        other_user = create_user(name: 'adrien')
+        current_week_user_entries = [
+          create_entry(user: user, started_at: Time.zone.now - 2.minutes, stopped_at: Time.zone.now),
+          create_entry(user: user, started_at: Time.zone.now - 2.minutes, stopped_at: Time.zone.now)
+        ]
+        other_entries = [
+          create_entry(user: other_user, started_at: Time.zone.now - 2.minutes, stopped_at: Time.zone.now),
+          create_entry(user: user, started_at: Time.zone.now - 1.week - 1.hour, stopped_at: Time.zone.now - 1.week),
+          create_entry(user: other_user, started_at: Time.zone.now - 1.week - 1.hour, stopped_at: Time.zone.now - 1.week)
+        ]
+        get '/entries', headers: headers, params: params
+        assert_response :success
+        assert_equal serialized(current_week_user_entries, EntrySerializer), response.body
+      end
+    end
+    describe 'With current-month and user-id filter' do
+      let(:params) do
+        { 'filter' => { 'current-month' => '1', 'user-id' => [user.id.to_s] } }
+      end
+      it 'serialize current month entries' do
+        other_user = create_user(name: 'adrien')
+        current_month_user_entries = [
+          create_entry(user: user, started_at: Time.zone.now - 20.minutes, stopped_at: Time.zone.now),
+          create_entry(user: user, started_at: Time.zone.now - 2.hours, stopped_at: Time.zone.now)
+          # TODO create entry with started_at older than 1 week but less than 1 month
+        ]
+        other_entries = [
+          create_entry(user: other_user, started_at: Time.zone.now - 2.minutes, stopped_at: Time.zone.now),
+          create_entry(user: user, started_at: Time.zone.now - 1.month - 1.hour, stopped_at: Time.zone.now - 1.month),
+          create_entry(user: other_user, started_at: Time.zone.now - 1.month - 1.hour, stopped_at: Time.zone.now - 1.month)
+        ]
+        get '/entries', headers: headers, params: params
+        assert_response :success
+        assert_equal serialized(current_month_user_entries, EntrySerializer), response.body
+      end
+    end
     describe 'With user-id, project-id, started-at and stopped-at filters' do
       it 'serialize entries filtered' do
         adrien = create_user(name: 'adrien')
