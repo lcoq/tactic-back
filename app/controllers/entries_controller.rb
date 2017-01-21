@@ -2,8 +2,8 @@ class EntriesController < ApplicationController
   before_action :authenticate
 
   def index
-    if current_week?
-      @entries = Entry.in_current_week.stopped.includes(:project, :user)
+    if current_week? || current_month?
+      @entries = find_entries_in_current_week_or_month
     elsif entry_filters?
       @entries = Entry.filter(entry_filters).stopped.includes(:project, :user)
     else
@@ -62,6 +62,20 @@ class EntriesController < ApplicationController
     index_filters['current-week']
   end
 
+  def current_month?
+    current_month_params == '1'
+  end
+
+  def current_month_params
+    return unless index_filters
+    index_filters['current-month']
+  end
+
+  def filter_user_id
+    return unless index_filters
+    index_filters['user-id']
+  end
+
   def entry_filters?
     return unless index_filters
     required = %w{ since before }
@@ -86,6 +100,7 @@ class EntriesController < ApplicationController
   def index_params
     filters = [
       'current-week',
+      'current-month',
       'since',
       'before',
       { 'user-id' => [] },
@@ -113,5 +128,13 @@ class EntriesController < ApplicationController
   def create_params
     authorized = %w{ title started-at stopped-at project }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
+  end
+
+  def find_entries_in_current_week_or_month
+    entries = Entry.stopped.includes(:project, :user)
+    entries = entries.in_current_month if current_month?
+    entries = entries.in_current_week if current_week?
+    entries = entries.where(user_id: filter_user_id) if filter_user_id
+    entries
   end
 end
