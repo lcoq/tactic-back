@@ -15,12 +15,14 @@ describe SessionsController do
     end
   end
   describe '#create' do
-    let(:user) { create_user(name: 'louis') }
+    let(:user) { create_user(name: 'louis', password: 'my-password') }
     let(:params) do
       {
         'data' => {
           'type' => 'session',
-          'attributes' => {},
+          'attributes' => {
+            'password' => 'my-password'
+          },
           'relationships' => {
             'user' => {
               'data' => {
@@ -40,8 +42,16 @@ describe SessionsController do
       assert session.present?
       assert_equal serialized(session, SessionSerializer), response.body
     end
+    it 'does not create a session with invalid password' do
+      params['data']['attributes']['password'] = 'invalid'
+      post '/sessions', params: params
+      assert_response :unprocessable_entity
+      body = JSON.parse(response.body)
+      refute body['errors'].empty?
+    end
     it 'does not create a session without user' do
-      post '/sessions', params: { 'data' => { 'type' => 'session', 'attributes' => {}, 'relationships' => {} } }
+      params['data']['relationships'].delete 'user'
+      post '/sessions', params: params
       assert_response :unprocessable_entity
       body = JSON.parse(response.body)
       refute body['errors'].empty?

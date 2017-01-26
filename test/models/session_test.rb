@@ -1,8 +1,8 @@
 require 'test_helper'
 
 describe Session do
-  let(:user) { create_user(name: 'louis') }
-  subject { build_session(user: user) }
+  let(:user) { create_user(name: 'louis', password: 'my-password') }
+  subject { build_session(user: user, password: 'my-password') }
 
   it 'is valid' do
     assert subject.valid?
@@ -17,6 +17,14 @@ describe Session do
   end
   it 'needs a user' do
     subject.user = nil
+    refute subject.valid?
+  end
+  it 'needs a password' do
+    subject.password = nil
+    refute subject.valid?
+  end
+  it 'password must match the user password' do
+    subject.password = 'invalid'
     refute subject.valid?
   end
   it 'name is the user name' do
