@@ -8,8 +8,24 @@ class User < ApplicationRecord
   end
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :password, presence: true, length: { minimum: 8 }, unless: :persisted?
 
   default_scope { order(:name) }
+
+  before_save :encrypt_password, if: :password
+
+  attr_reader :password
+
+  def authenticate(raw_password)
+    encrypt_string("#{salt}--#{raw_password}") == encrypted_password
+  end
+
+  def password=(new_password)
+    return unless new_password
+    self.salt = nil
+    self.encrypted_password = nil
+    @password = new_password
+  end
 
   def recent_entries
     entries.recent
@@ -17,5 +33,21 @@ class User < ApplicationRecord
 
   def running_entry
     entries.running
+  end
+
+  private
+
+  def encrypt_password
+    self.salt = encrypt_string(random_string)
+    self.encrypted_password = encrypt_string("#{salt}--#{password}")
+    @password = nil
+  end
+
+  def encrypt_string(string)
+    Digest::SHA1.hexdigest string
+  end
+
+  def random_string
+    "#{Time.now}+#{rand(10000)}"
   end
 end

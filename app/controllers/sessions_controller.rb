@@ -17,7 +17,7 @@ class SessionsController < ApplicationController
   private
 
   def create_params
-    authorized = %w{ user }
+    authorized = %w{ user password }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
   end
 end

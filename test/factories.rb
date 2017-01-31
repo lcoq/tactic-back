@@ -14,10 +14,12 @@ module Factories
     end
   end
 
-  factory :user
+  factory :user do
+    { password: 'my-password' }
+  end
 
   factory :session do
-    { token: SecureRandom.uuid }
+    { token: SecureRandom.uuid, password: 'my-password' }
   end
 
   factory :entry do
