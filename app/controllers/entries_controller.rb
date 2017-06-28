@@ -89,7 +89,8 @@ class EntriesController < ApplicationController
       user_ids: index_filters['user-id'],
       project_ids: project_ids,
       since: Time.zone.parse(index_filters['since']),
-      before: Time.zone.parse(index_filters['before'])
+      before: Time.zone.parse(index_filters['before']),
+      query: index_filters['query']
     }
   end
 
@@ -103,6 +104,7 @@ class EntriesController < ApplicationController
       'current-month',
       'since',
       'before',
+      'query',
       { 'user-id' => [] },
       { 'project-id' => [] }
     ]

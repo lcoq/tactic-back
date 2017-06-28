@@ -17,7 +17,14 @@ class Entry < ApplicationRecord
     scoped = since(h[:since]).before(h[:before])
     scoped = scoped.where(user_id: h[:user_ids]) if h[:user_ids]
     scoped = scoped.where(project_id: h[:project_ids]) if h[:project_ids]
+    scoped = scoped.for_query(h[:query]) if h[:query]
     scoped
+  }
+
+  scope :for_query, ->(query) {
+    or_words = query.split(/\s*\|\s*/).map { |word| "%#{word}%" }
+    clause = or_words.length.times.map { "title ILIKE ?" }.join(" OR ")
+    where(clause, *or_words)
   }
 
   def started_at=(*_)
