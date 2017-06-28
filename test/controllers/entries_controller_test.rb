@@ -147,6 +147,37 @@ describe EntriesController do
         assert_equal serialized([], EntrySerializer), response.body
       end
     end
+    describe 'With query filter' do
+      let(:params) do
+        {
+          'filter' => {
+            'since' => '1970-01-01T22:00:00.000Z',
+            'before' => (Time.zone.now + 10.years).to_s,
+            'query' => 'tâch'
+          }
+        }
+      end
+      it 'serialize matching entries' do
+        entries = [
+          create_entry(user: user, title: "tâch"),
+          create_entry(user: user, title: "tâche"),
+          create_entry(user: user, title: "ttâche"),
+          create_entry(user: user, title: "avant tâche"),
+          create_entry(user: user, title: "tâche après"),
+          create_entry(user: user, title: "avant tâche après")
+        ]
+        get '/entries', headers: headers, params: params
+        assert_response :success
+        assert_equal serialized(entries, EntrySerializer), response.body
+      end
+      it 'does not serialize non matching entries' do
+        create_entry(user: user, title: "un truc qui n'a rien à voir")
+        create_entry(user: user, title: "tâc")
+        get '/entries', headers: headers, params: params
+        assert_response :success
+        assert_equal serialized([], EntrySerializer), response.body
+      end
+    end
   end
 
   describe '#running' do

@@ -74,6 +74,66 @@ describe Entry do
           project_ids: [nil]
         ).wont_include entry
       end
+      it 'includes entries matching query' do
+        user = create_user(name: 'louis')
+        since = Time.zone.now.beginning_of_day
+        before = Time.zone.now.end_of_day
+        entries = [
+          create_entry(user: user, title: "tâch", started_at: since + 1.second, stopped_at: since + 2.seconds),
+          create_entry(user: user, title: "tâche", started_at: since + 1.second, stopped_at: since + 2.seconds),
+          create_entry(user: user, title: "ttâche", started_at: since + 1.second, stopped_at: since + 2.seconds),
+          create_entry(user: user, title: "avant tâche", started_at: since + 1.second, stopped_at: since + 2.seconds),
+          create_entry(user: user, title: "tâche après", started_at: since + 1.second, stopped_at: since + 2.seconds),
+          create_entry(user: user, title: "avant tâche après", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        ]
+        (entries - subject.filter(since: since, before: before, query: "tâch")).must_be_empty
+      end
+      it 'does not include entries not matching query' do
+        user = create_user(name: 'louis')
+        since = Time.zone.now.beginning_of_day
+        before = Time.zone.now.end_of_day
+        create_entry(user: user, title: "un truc qui n'a rien à voir", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        create_entry(user: user, title: "tâc", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        subject.filter(since: since, before: before, query: "tâch").must_be_empty
+      end
+      it 'includes entries matching OR query' do
+        user = create_user(name: 'louis')
+        since = Time.zone.now.beginning_of_day
+        before = Time.zone.now.end_of_day
+        entries = [
+          create_entry(user: user, title: "une tâche", started_at: since + 1.second, stopped_at: since + 2.seconds),
+          create_entry(user: user, title: "à faire", started_at: since + 1.second, stopped_at: since + 2.seconds),
+          create_entry(user: user, title: "une tâche à faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        ]
+        (entries - subject.filter(since: since, before: before, query: "tâche | faire")).must_be_empty
+      end
+      it 'does not include entries not matching OR query' do
+        user = create_user(name: 'louis')
+        since = Time.zone.now.beginning_of_day
+        before = Time.zone.now.end_of_day
+        create_entry(user: user, title: "un truc qui n'a rien à voir", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        create_entry(user: user, title: "tâc", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        subject.filter(since: since, before: before, query: "tâche | faire").must_be_empty
+      end
+      it 'includes entries matching AND query' do
+        user = create_user(name: 'louis')
+        since = Time.zone.now.beginning_of_day
+        before = Time.zone.now.end_of_day
+        entries = [
+          create_entry(user: user, title: "une tâche qu'il faut faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        ]
+        (entries - subject.filter(since: since, before: before, query: "qu'il faut faire")).must_be_empty
+      end
+      it 'does not include entries not matching OR query' do
+        user = create_user(name: 'louis')
+        since = Time.zone.now.beginning_of_day
+        before = Time.zone.now.end_of_day
+        create_entry(user: user, title: "une tâche", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        create_entry(user: user, title: "il faut", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        create_entry(user: user, title: "une tâche qu'il faut", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        create_entry(user: user, title: "faut faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
+        subject.filter(since: since, before: before, query: "qu'il faut faire").must_be_empty
+      end
     end
   end
 end
