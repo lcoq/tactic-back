@@ -49,6 +49,25 @@ describe Entry do
     assert_nil subject.duration
   end
 
+  it 'rounded started at is rounded to 5 minutes' do
+    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_started_at
+    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:59", "28/06/2018 16:26:00").rounded_started_at
+    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_started_at
+    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:00").rounded_started_at
+  end
+  it 'rounded duration is rounded to 5 minutes' do
+    assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration
+    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration
+    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration
+    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:30:00").rounded_duration
+  end
+  it 'rounded stopped at is rounded to 5 minutes according to started at rounded and duration' do
+    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at
+    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at
+    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at
+    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at
+  end
+
   describe 'Class methods' do
     subject { Entry }
 
@@ -147,5 +166,17 @@ describe Entry do
         subject.filter(since: since, before: before, query: "qu'il faut faire").must_be_empty
       end
     end
+  end
+
+  def build_entry_with_times(started_at, stopped_at)
+    build_entry(
+      user: user,
+      started_at: parse_time(started_at),
+      stopped_at: parse_time(stopped_at)
+    )
+  end
+
+  def parse_time(time)
+    Time.zone.parse time
   end
 end

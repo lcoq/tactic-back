@@ -42,6 +42,36 @@ class Entry < ApplicationRecord
     stopped_at - started_at
   end
 
+  def round_minutes
+    5
+  end
+
+  def rounded_started_at
+    return unless started_at.present?
+    minutes = started_at.min
+    rounded = started_at.beginning_of_minute
+    if minutes % round_minutes != 0
+      rounded += (round_minutes - (minutes % round_minutes)).minutes
+    end
+    rounded
+  end
+
+  def rounded_stopped_at
+    return if running?
+    rounded_started_at + rounded_duration.seconds
+  end
+
+  def rounded_duration
+    return unless duration
+    seconds = duration
+    minutes = (seconds.seconds / 1.minute).truncate
+    rounded = minutes
+    if minutes % round_minutes != 0
+      rounded += (round_minutes - (minutes % round_minutes))
+    end
+    rounded.minutes.to_i
+  end
+
   private
 
   def running?
