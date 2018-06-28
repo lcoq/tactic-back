@@ -46,11 +46,9 @@ class EntryCSV
     total = duration.seconds
     hours = (total / 1.hour).truncate
     minutes = ((total - hours.hours) / 1.minute).truncate
-    seconds = ((total - hours.hours - minutes.minutes) / 1.second).truncate
+    # seconds = ((total - hours.hours - minutes.minutes) / 1.second).truncate
     value_format = "%02.f"
-    formatted_parts = [ value_format % minutes, value_format % seconds ]
-    formatted_parts.unshift(value_format % hours) if hours > 0
-    formatted_parts.join(':')
+    [ value_format % hours, value_format % minutes ].join(':')
   end
 
   def format_date(datetime)
