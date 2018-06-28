@@ -15,7 +15,7 @@ class EntriesController < ApplicationController
     respond_to do |format|
       format.csv do
         @entries = scope_entries_for_csv(@entries)
-        csv = EntryCSV.new(@entries).generate
+        csv = build_csv(@entries)
         send_data csv
       end
       format.any { render json: @entries, include: index_include_params }
@@ -108,6 +108,10 @@ class EntriesController < ApplicationController
     index_params['filter']
   end
 
+  def index_options
+    index_params['options']
+  end
+
   def index_params
     filters = [
       'current-week',
@@ -118,7 +122,15 @@ class EntriesController < ApplicationController
       { 'user-id' => [] },
       { 'project-id' => [] }
     ]
-    params.permit('Authorization', 'format', 'include', 'filter' => filters)
+    options = [
+      'rounded'
+    ]
+    params.permit('Authorization',
+                  'format',
+                  'include',
+                  'filter' => filters,
+                  'options' => options
+                 )
   end
 
   def running_include_params
@@ -155,5 +167,10 @@ class EntriesController < ApplicationController
       includes(project: :client).
       left_outer_joins(:user, project: :client).
       order('users.name ASC, clients.name ASC NULLS FIRST, projects.name ASC NULLS FIRST, started_at DESC')
+  end
+
+  def build_csv(entries)
+    rounded = index_options && index_options['rounded']
+    EntryCSV.new(entries, rounded: rounded).generate
   end
 end

@@ -208,6 +208,25 @@ describe EntriesController do
         csv = CSV.parse(response.body, headers: true)
         assert_equal filtered_entries.length, csv.length
       end
+      it 'serialize entries filtered and rounded' do
+        now = Time.zone.now.beginning_of_hour
+        create_entry(user: user, started_at: (now + 25.minutes + 59.seconds), stopped_at: (now + 30.minutes + 1.second))
+        create_entry(user: user, started_at: (now + 10.minutes + 00.seconds), stopped_at: (now + 10.minutes + 59.second))
+        filters = {
+          'user-id' => [ user.id.to_s ],
+          'project-id' => ['0'],
+          'since' => (Time.zone.now - 1.day).beginning_of_day.as_json,
+          'before' => Time.zone.now.end_of_day.as_json
+        }
+        options = {
+          'rounded' => true
+        }
+        get '/entries.csv', params: { 'filter' => filters, 'options' => options, 'Authorization' => headers['Authorization'] }
+        assert_response :success
+        csv = CSV.parse(response.body, headers: true)
+        assert_equal '00:05', csv[0]['duration']
+        assert_equal '00:00', csv[1]['duration']
+      end
       it 'sort entries by user, client, project name and started at desc' do
         adrien = create_user(name: 'adrien')
         ingrid = create_user(name: 'ingrid')

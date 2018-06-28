@@ -1,10 +1,11 @@
 require 'csv'
 
 class EntryCSV
-  attr_reader :collection
+  attr_reader :collection, :rounded
 
-  def initialize(collection)
+  def initialize(collection, rounded: false)
     @collection = collection
+    @rounded = rounded
   end
 
   def generate
@@ -35,10 +36,10 @@ class EntryCSV
       entry.project.try(:client).try(:name),
       entry.project.try(:name),
       entry.title,
-      format_duration(entry.duration),
-      format_date(entry.started_at),
-      format_time(entry.started_at),
-      format_time(entry.stopped_at)
+      rounded ? format_duration(entry.rounded_duration) : format_duration(entry.duration),
+      rounded ? format_date(entry.rounded_started_at) : format_date(entry.started_at),
+      rounded ? format_time(entry.rounded_started_at) : format_time(entry.started_at),
+      rounded ? format_time(entry.rounded_stopped_at) : format_time(entry.stopped_at)
     ]
   end
 
