@@ -13,7 +13,11 @@ class EntriesController < ApplicationController
       @entries = current_user.recent_entries.stopped.includes(:project, :user)
     end
     respond_to do |format|
-      format.csv { send_data EntryCSV.new(@entries).generate }
+      format.csv do
+        @entries = scope_entries_for_csv(@entries)
+        csv = EntryCSV.new(@entries).generate
+        send_data csv
+      end
       format.any { render json: @entries, include: index_include_params }
     end
   end
@@ -144,5 +148,12 @@ class EntriesController < ApplicationController
     entries = entries.in_current_week if current_week?
     entries = entries.where(user_id: filter_user_id) if filter_user_id
     entries
+  end
+
+  def scope_entries_for_csv(entries)
+    entries.
+      includes(project: :client).
+      left_outer_joins(:user, project: :client).
+      order('users.name ASC, clients.name ASC NULLS FIRST, projects.name ASC NULLS FIRST, started_at DESC')
   end
 end
