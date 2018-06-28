@@ -37,6 +37,11 @@ class Entry < ApplicationRecord
     super stopped_at.change(usec: 0) if stopped_at
   end
 
+  def duration
+    return if running?
+    stopped_at - started_at
+  end
+
   private
 
   def running?

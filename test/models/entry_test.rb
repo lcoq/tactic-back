@@ -37,6 +37,18 @@ describe Entry do
     assert_equal "2016-12-07T09:42:04.000Z", subject.stopped_at.as_json
   end
 
+  it 'duration is in seconds' do
+    started_at = Time.zone.now
+    duration = 6.hours + 3.minutes + 15.seconds
+    stopped_at = started_at + duration
+    subject = build_entry(started_at: started_at, stopped_at: stopped_at)
+    assert_equal 21795.seconds, subject.duration
+  end
+  it 'duration is nil without stopped at' do
+    subject.stopped_at = nil
+    assert_nil subject.duration
+  end
+
   describe 'Class methods' do
     subject { Entry }
 
