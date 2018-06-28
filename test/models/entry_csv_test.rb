@@ -36,8 +36,9 @@ describe EntryCSV do
         assert_equal entries[index].title, row['title']
         expected_minutes = "%02.f" % (index+2)
         assert_equal "01:#{expected_minutes}:00", row['duration']
-        assert_equal entries[index].started_at.strftime("%d/%m/%Y %H:%m:%S"), row['started at']
-        assert_equal entries[index].stopped_at.strftime("%d/%m/%Y %H:%m:%S"), row['stopped at']
+        assert_equal entries[index].started_at.strftime("%d/%m/%Y"), row['date']
+        assert_equal entries[index].started_at.strftime("%H:%M"), row['start time']
+        assert_equal entries[index].stopped_at.strftime("%H:%M"), row['end time']
      end
     end
   end

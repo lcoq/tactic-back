@@ -23,8 +23,9 @@ class EntryCSV
       'project',
       'title',
       'duration',
-      'started at',
-      'stopped at'
+      'date',
+      'start time',
+      'end time'
     ]
   end
 
@@ -35,8 +36,9 @@ class EntryCSV
       entry.project.try(:name),
       entry.title,
       format_duration(entry.duration),
-      format_datetime(entry.started_at),
-      format_datetime(entry.stopped_at)
+      format_date(entry.started_at),
+      format_time(entry.started_at),
+      format_time(entry.stopped_at)
     ]
   end
 
@@ -51,7 +53,11 @@ class EntryCSV
     formatted_parts.join(':')
   end
 
-  def format_datetime(datetime)
-    datetime.strftime "%d/%m/%Y %H:%m:%S"
+  def format_date(datetime)
+    datetime.strftime "%d/%m/%Y"
+  end
+
+  def format_time(datetime)
+    datetime.strftime "%H:%M"
   end
 end
