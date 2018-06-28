@@ -1,5 +1,8 @@
 class EntriesController < ApplicationController
-  before_action :authenticate
+  include ActionController::MimeResponds
+
+  before_action :authenticate, except: :index
+  before_action :authenticate_from_headers_or_params, only: :index
 
   def index
     if current_week? || current_month?
@@ -9,7 +12,10 @@ class EntriesController < ApplicationController
     else
       @entries = current_user.recent_entries.stopped.includes(:project, :user)
     end
-    render json: @entries, include: index_include_params
+    respond_to do |format|
+      format.csv { send_data EntryCSV.new(@entries).generate }
+      format.any { render json: @entries, include: index_include_params }
+    end
   end
 
   def running
@@ -108,7 +114,7 @@ class EntriesController < ApplicationController
       { 'user-id' => [] },
       { 'project-id' => [] }
     ]
-    params.permit('include', 'filter' => filters)
+    params.permit('Authorization', 'format', 'include', 'filter' => filters)
   end
 
   def running_include_params
