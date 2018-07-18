@@ -17,5 +17,6 @@ Bundler.require(*Rails.groups)
 module TacticBack
   class Application < Rails::Application
     config.api_only = true
+    config.time_zone = 'Paris'
   end
 end

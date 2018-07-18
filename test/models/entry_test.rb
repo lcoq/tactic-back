@@ -30,11 +30,42 @@ describe Entry do
   end
   it 'drop the milliseconds on started at' do
     subject.started_at = Time.zone.parse("2016-12-07T09:42:04.123Z")
-    assert_equal "2016-12-07T09:42:04.000Z", subject.started_at.as_json
+    assert_equal "2016-12-07T09:42:04.000Z", subject.started_at.utc.as_json
   end
   it 'drop the milliseconds on stopped at' do
     subject.stopped_at = Time.zone.parse("2016-12-07T09:42:04.123Z")
-    assert_equal "2016-12-07T09:42:04.000Z", subject.stopped_at.as_json
+    assert_equal "2016-12-07T09:42:04.000Z", subject.stopped_at.utc.as_json
+  end
+
+  it 'duration is in seconds' do
+    started_at = Time.zone.now
+    duration = 6.hours + 3.minutes + 15.seconds
+    stopped_at = started_at + duration
+    subject = build_entry(started_at: started_at, stopped_at: stopped_at)
+    assert_equal 21795.seconds, subject.duration
+  end
+  it 'duration is nil without stopped at' do
+    subject.stopped_at = nil
+    assert_nil subject.duration
+  end
+
+  it 'rounded started at is rounded to 5 minutes' do
+    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_started_at
+    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:59", "28/06/2018 16:26:00").rounded_started_at
+    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_started_at
+    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:00").rounded_started_at
+  end
+  it 'rounded duration is rounded to 5 minutes' do
+    assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration
+    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration
+    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration
+    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:30:00").rounded_duration
+  end
+  it 'rounded stopped at is rounded to 5 minutes according to started at rounded and duration' do
+    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at
+    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at
+    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at
+    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at
   end
 
   describe 'Class methods' do
@@ -135,5 +166,17 @@ describe Entry do
         subject.filter(since: since, before: before, query: "qu'il faut faire").must_be_empty
       end
     end
+  end
+
+  def build_entry_with_times(started_at, stopped_at)
+    build_entry(
+      user: user,
+      started_at: parse_time(started_at),
+      stopped_at: parse_time(stopped_at)
+    )
+  end
+
+  def parse_time(time)
+    Time.zone.parse time
   end
 end

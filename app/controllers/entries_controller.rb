@@ -1,5 +1,8 @@
 class EntriesController < ApplicationController
-  before_action :authenticate
+  include ActionController::MimeResponds
+
+  before_action :authenticate, except: :index
+  before_action :authenticate_from_headers_or_params, only: :index
 
   def index
     if current_week? || current_month?
@@ -9,7 +12,14 @@ class EntriesController < ApplicationController
     else
       @entries = current_user.recent_entries.stopped.includes(:project, :user)
     end
-    render json: @entries, include: index_include_params
+    respond_to do |format|
+      format.csv do
+        @entries = scope_entries_for_csv(@entries)
+        csv = build_csv(@entries)
+        send_data csv
+      end
+      format.any { render json: @entries, include: index_include_params }
+    end
   end
 
   def running
@@ -98,6 +108,10 @@ class EntriesController < ApplicationController
     index_params['filter']
   end
 
+  def index_options
+    index_params['options']
+  end
+
   def index_params
     filters = [
       'current-week',
@@ -108,7 +122,15 @@ class EntriesController < ApplicationController
       { 'user-id' => [] },
       { 'project-id' => [] }
     ]
-    params.permit('include', 'filter' => filters)
+    options = [
+      'rounded'
+    ]
+    params.permit('Authorization',
+                  'format',
+                  'include',
+                  'filter' => filters,
+                  'options' => options
+                 )
   end
 
   def running_include_params
@@ -138,5 +160,17 @@ class EntriesController < ApplicationController
     entries = entries.in_current_week if current_week?
     entries = entries.where(user_id: filter_user_id) if filter_user_id
     entries
+  end
+
+  def scope_entries_for_csv(entries)
+    entries.
+      includes(project: :client).
+      left_outer_joins(:user, project: :client).
+      order('users.name ASC, clients.name ASC NULLS FIRST, projects.name ASC NULLS FIRST, started_at DESC')
+  end
+
+  def build_csv(entries)
+    rounded = index_options && index_options['rounded']
+    EntryCSV.new(entries, rounded: rounded).generate
   end
 end

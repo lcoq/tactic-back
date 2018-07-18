@@ -178,6 +178,119 @@ describe EntriesController do
         assert_equal serialized([], EntrySerializer), response.body
       end
     end
+    describe 'With csv format' do
+      it 'serialize entries filtered' do
+        adrien = create_user(name: 'adrien')
+        tactic = create_project(name: 'tactic')
+        tictoc = create_project(name: 'tictoc')
+        other_project = create_project(name: 'other')
+
+        filtered_entries = [
+          create_entry(user: adrien, started_at: Time.zone.now - 3.hours, stopped_at: Time.zone.now - 2.hours, project: tactic),
+          create_entry(user: adrien, started_at: Time.zone.now - 10.minutes, stopped_at: Time.zone.now, project: tactic),
+          create_entry(user: adrien, started_at: Time.zone.now - 2.hours, stopped_at: Time.zone.now - 1.hour, project: tictoc)
+        ]
+
+        other_entries = [
+          create_entry(user: user, started_at: Time.zone.now - 3.hours, stopped_at: Time.zone.now - 2.hours, project: tactic),
+          create_entry(user: adrien, started_at: Time.zone.now - 3.hours, stopped_at: Time.zone.now - 2.hours, project: other_project),
+          create_entry(user: adrien, started_at: Time.zone.now - 3.days - 2.hours, stopped_at: Time.zone.now - 3.days - 1.hour, project: other_project)
+        ]
+
+        filters = {
+          'user-id' => [ adrien.id.to_s ],
+          'project-id' => [ tactic.id.to_s, tictoc.id.to_s ],
+          'since' => (Time.zone.now - 1.day).beginning_of_day.as_json,
+          'before' => Time.zone.now.end_of_day.as_json
+        }
+        get '/entries.csv', params: { 'filter' => filters, 'Authorization' => headers['Authorization'] }
+        assert_response :success
+        csv = CSV.parse(response.body, headers: true)
+        assert_equal filtered_entries.length, csv.length
+      end
+      it 'serialize entries filtered and rounded' do
+        now = Time.zone.now.beginning_of_hour
+        create_entry(user: user, started_at: (now + 25.minutes + 59.seconds), stopped_at: (now + 30.minutes + 1.second))
+        create_entry(user: user, started_at: (now + 10.minutes + 00.seconds), stopped_at: (now + 10.minutes + 59.second))
+        filters = {
+          'user-id' => [ user.id.to_s ],
+          'project-id' => ['0'],
+          'since' => (Time.zone.now - 1.day).beginning_of_day.as_json,
+          'before' => Time.zone.now.end_of_day.as_json
+        }
+        options = {
+          'rounded' => true
+        }
+        get '/entries.csv', params: { 'filter' => filters, 'options' => options, 'Authorization' => headers['Authorization'] }
+        assert_response :success
+        csv = CSV.parse(response.body, headers: true)
+        assert_equal '00:05', csv[0]['duration']
+        assert_equal '00:00', csv[1]['duration']
+      end
+      it 'sort entries by user, client, project name and started at desc' do
+        adrien = create_user(name: 'adrien')
+        ingrid = create_user(name: 'ingrid')
+
+        efficiency = create_client(name: 'efficiency')
+        productivity = create_client(name: 'productivity')
+
+        no_client_project = create_project(name: 'no client')
+
+        tactic = create_project(name: 'tactic', client: efficiency)
+        tictoc = create_project(name: 'tictoc', client: efficiency)
+
+        tuctuc = create_project(name: 'tuctuc', client: productivity)
+        tyctyc = create_project(name: 'tyctyc', client: productivity)
+
+        entries = [
+          create_entry(title: 'e1', user: adrien, started_at: Time.zone.now - 5.hours, stopped_at: Time.zone.now - 4.hours, project: nil),
+
+          create_entry(title: 'e2', user: adrien, started_at: Time.zone.now - 6.hours, stopped_at: Time.zone.now - 5.hours, project: no_client_project),
+
+          create_entry(title: 'e3', user: adrien, started_at: Time.zone.now - 6.hours, stopped_at: Time.zone.now - 5.hours, project: tactic),
+          create_entry(title: 'e4', user: adrien, started_at: Time.zone.now - 7.hours, stopped_at: Time.zone.now - 6.hours, project: tactic),
+
+          create_entry(title: 'e5', user: adrien, started_at: Time.zone.now - 8.hours, stopped_at: Time.zone.now - 7.hours, project: tictoc),
+
+          create_entry(title: 'e6', user: adrien, started_at: Time.zone.now - 2.hours, stopped_at: Time.zone.now - 1.hours, project: tuctuc),
+          create_entry(title: 'e7', user: adrien, started_at: Time.zone.now - 3.hours, stopped_at: Time.zone.now - 2.hours, project: tuctuc),
+
+          create_entry(title: 'e8', user: adrien, started_at: Time.zone.now - 2.hours, stopped_at: Time.zone.now - 1.hours, project: tyctyc),
+
+          create_entry(title: 'e9', user: ingrid, started_at: Time.zone.now - 1.hours, stopped_at: Time.zone.now, project: nil),
+          create_entry(title: 'e10', user: ingrid, started_at: Time.zone.now - 2.hours, stopped_at: Time.zone.now, project: nil),
+
+          create_entry(title: 'e11', user: ingrid, started_at: Time.zone.now - 2.hours, stopped_at: Time.zone.now, project: tuctuc)
+        ]
+
+        filters = {
+          'user-id' => [ adrien.id.to_s, ingrid.id.to_s ],
+          'project-id' => [ '0', no_client_project.id.to_s , tactic.id.to_s, tictoc.id.to_s, tuctuc.id.to_s, tyctyc.id.to_s ],
+          'since' => (Time.zone.now - 1.day).beginning_of_day.as_json,
+          'before' => Time.zone.now.end_of_day.as_json
+        }
+        get '/entries.csv', params: { 'filter' => filters, 'Authorization' => headers['Authorization'] }
+        assert_response :success
+        csv_titles = CSV.parse(response.body, headers: true).map { |row| row['title'] }
+        assert_equal entries.map(&:title), csv_titles
+      end
+      it 'does not serialize running entries' do
+        adrien = create_user(name: 'adrien')
+        tactic = create_project(name: 'tactic')
+        create_entry(user: adrien, started_at: Time.zone.now - 1.minute, stopped_at: nil, project: tactic)
+
+        filters = {
+          'user-id' => [ adrien.id.to_s ],
+          'project-id' => [ tactic.id.to_s ],
+          'since' => (Time.zone.now - 1.day).beginning_of_day.as_json,
+          'before' => Time.zone.now.end_of_day.as_json
+        }
+        get '/entries.csv', params: { 'filter' => filters, 'Authorization' => headers['Authorization'] }
+        assert_response :success
+        csv = CSV.parse(response.body, headers: true)
+        assert_equal 0, csv.length
+      end
+    end
   end
 
   describe '#running' do
