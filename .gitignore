@@ -12,3 +12,6 @@
 
 # Ignore database.yml
 config/database.yml
+
+.env
+dumps/
