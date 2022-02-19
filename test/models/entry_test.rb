@@ -84,6 +84,23 @@ describe Entry do
       end
     end
 
+    describe "#before" do
+      it 'does not include entries after date' do
+        date = Time.zone.yesterday.beginning_of_day
+        user = create_user(name: 'louis')
+        entry = create_entry(user: user, started_at: date + 1.minute, stopped_at: date + 2.minutes)
+        results = subject.before(date)
+        assert_equal 0, results.length
+      end
+      it 'includes entries before date' do
+        date = Time.zone.yesterday.end_of_day
+        user = create_user(name: 'louis')
+        entry = create_entry(user: user, started_at: date - 2.minutes, stopped_at: date - 1.minute)
+        results = subject.before(date)
+        assert_equal 1, results.length
+      end
+    end
+
     describe '#filters' do
       it 'includes entries without project with project_ids nil' do
         louis = create_user(name: 'louis')
