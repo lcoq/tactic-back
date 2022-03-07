@@ -458,13 +458,8 @@ describe EntriesController do
     end
     it 'destroy the entry' do
       delete "/entries/#{entry.id}", headers: headers
-      assert_response :success
+      assert_response :no_content
       assert_raises(ActiveRecord::RecordNotFound) { entry.reload }
-    end
-    it 'serialize the entry' do
-      delete "/entries/#{entry.id}", headers: headers
-      assert_response :success
-      assert_equal serialized(entry, EntrySerializer), response.body
     end
   end
 end
