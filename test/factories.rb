@@ -34,6 +34,14 @@ module Factories
     { name: "Client" }
   end
 
+  factory :entries_stat do
+    { date: Date.yesterday, duration: 300 }
+  end
+
+  factory :entries_stat_group do
+    { title: "My entries stat group", nature: "hour/month", entries_stats: [] }
+  end
+
   private
 
   def build_record(type, attributes)

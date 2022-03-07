@@ -10,6 +10,13 @@ class ProjectsController < ApplicationController
     render json: @projects, include: include_params
   end
 
+  # needed for current month entries which includes project.
+  # maybe we should instead remove project details from those entries
+  def show
+    @project = Project.find(params[:id])
+    render json: @project
+  end
+
   def create
     @project = Project.new
     if @project.update_attributes(create_params)
