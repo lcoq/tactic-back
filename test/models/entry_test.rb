@@ -106,8 +106,8 @@ describe Entry do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis)
         subject.filter(
-          since: entry.created_at.beginning_of_day,
-          before: entry.created_at.end_of_day,
+          since: entry.started_at.beginning_of_day,
+          before: entry.started_at.end_of_day,
           user_ids: [ louis.id.to_s ],
           project_ids: [nil]
         ).must_include entry
@@ -116,8 +116,8 @@ describe Entry do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis, project: create_project(name: 'Tactic'))
         subject.filter(
-          since: entry.created_at.beginning_of_day,
-          before: entry.created_at.end_of_day,
+          since: entry.started_at.beginning_of_day,
+          before: entry.started_at.end_of_day,
           user_ids: [ louis.id.to_s ],
           project_ids: [nil]
         ).wont_include entry
