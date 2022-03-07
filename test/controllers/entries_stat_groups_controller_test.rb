@@ -40,14 +40,16 @@ describe EntriesStatGroupsController do
         'user-id' => [ adrien.id.to_s ],
         'project-id' => [ tactic.id.to_s, tictoc.id.to_s ],
         'since' => (Time.zone.now - 5.day).beginning_of_day.as_json,
-        'before' => (Time.zone.now - 1.day).end_of_day.as_json
+        'before' => (Time.zone.now - 1.day).end_of_day.as_json,
+        'query' => 't'
       }
 
       expected_builder = EntriesStatGroupBuilder.daily(
         user_ids:  filters['user-id'],
         project_ids:  filters['project-id'],
         since: Time.zone.parse(filters['since']),
-        before: Time.zone.parse(filters['before'])
+        before: Time.zone.parse(filters['before']),
+        query: 't'
       )
 
       get path, headers: headers, params: { 'filter' => filters }
@@ -91,14 +93,16 @@ describe EntriesStatGroupsController do
         'user-id' => [ adrien.id.to_s ],
         'project-id' => [ tactic.id.to_s, tictoc.id.to_s ],
         'since' => (Time.zone.now - 5.month).beginning_of_month.as_json,
-        'before' => (Time.zone.now - 1.month).end_of_month.as_json
+        'before' => (Time.zone.now - 1.month).end_of_month.as_json,
+        'query' => 't'
       }
 
       expected_builder = EntriesStatGroupBuilder.monthly(
         user_ids:  filters['user-id'],
         project_ids:  filters['project-id'],
         since: Time.zone.parse(filters['since']),
-        before: Time.zone.parse(filters['before'])
+        before: Time.zone.parse(filters['before']),
+        query: 't'
       )
 
       get path, headers: headers, params: { 'filter' => filters }

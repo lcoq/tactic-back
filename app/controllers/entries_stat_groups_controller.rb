@@ -33,8 +33,9 @@ class EntriesStatGroupsController < ApplicationController
     {
       user_ids: index_filters['user-id'],
       project_ids: project_ids,
-      since: Time.zone.parse(index_filters['since']).beginning_of_month, # TODO should probably be done client-side
-      before: Time.zone.parse(index_filters['before']).end_of_month # TODO should probably be done client-side
+      since: Time.zone.parse(index_filters['since']),
+      before: Time.zone.parse(index_filters['before']),
+      query: index_filters['query']
     }
   end
 
@@ -51,7 +52,8 @@ class EntriesStatGroupsController < ApplicationController
       user_ids: index_filters['user-id'],
       project_ids: project_ids,
       since: Time.zone.parse(index_filters['since']),
-      before: Time.zone.parse(index_filters['before'])
+      before: Time.zone.parse(index_filters['before']),
+      query: index_filters['query']
     }
   end
 
@@ -63,6 +65,7 @@ class EntriesStatGroupsController < ApplicationController
     filters = [
       'since',
       'before',
+      'query',
       { 'user-id' => [] },
       { 'project-id' => [] }
     ]
