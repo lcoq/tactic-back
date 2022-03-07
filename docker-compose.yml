@@ -1,0 +1,61 @@
+version: '3.8'
+volumes:
+  db_data:
+  testdb_data:
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/code
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres@db/web
+    env_file:
+      - .env
+    depends_on:
+      - db
+    logging:
+      options:
+        max-size: "10m"
+  db:
+    image: postgres:13.5
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./dumps:/dumps
+    environment:
+      POSTGRES_DB: web
+      POSTGRES_HOST_AUTH_METHOD: trust
+    logging:
+      options:
+        max-size: "5m"
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bin/bundle exec guard --no-interactions
+    volumes:
+      - .:/code
+    environment:
+      DATABASE_URL: postgresql://postgres@testdb/test
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
+    env_file:
+      - .env
+    depends_on:
+      - testdb
+    logging:
+      options:
+        max-size: "10m"
+  testdb:
+    image: postgres
+    volumes:
+      - testdb_data:/var/lib/postgresql/data
+      - ./dumps:/dumps
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_HOST_AUTH_METHOD: trust
+    logging:
+      options:
+        max-size: "5m"        
