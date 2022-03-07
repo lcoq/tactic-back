@@ -16,7 +16,7 @@ class EntriesStatGroupBuilder
     entries_scope = Entry.filter(filters)
     EntriesStatGroup.new(
       id: build_id(filters, "%Y/%m/%d"),
-      title: build_title("Hours per day", filters, "%-d %B %Y"),
+      title: build_title("Hours per day", filters),
       nature: 'hour/day',
       entries_stats: build_entries_stats('day', entries_scope)
     )
@@ -26,7 +26,7 @@ class EntriesStatGroupBuilder
     entries_scope = Entry.filter(filters)
     EntriesStatGroup.new(
       id: build_id(filters, "%Y/%m"),
-      title: build_title("Hours per month", filters, "%B %Y"),
+      title: build_title("Hours per month", filters),
       nature: 'hour/month',
       entries_stats: build_entries_stats('month', entries_scope)
     )
@@ -34,7 +34,8 @@ class EntriesStatGroupBuilder
 
   private
 
-  def build_title(title, filters, format)
+  def build_title(title, filters)
+    format = "%-d %B %Y"
     since = filters[:since].strftime(format)
     before = filters[:before].strftime(format)
     "#{title} from #{since} to #{before}"

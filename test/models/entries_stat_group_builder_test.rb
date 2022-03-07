@@ -144,7 +144,7 @@ describe EntriesStatGroupBuilder do
     end
 
     it 'has title' do
-      expected_format = "%B %Y"
+      expected_format = "%-d %B %Y"
       expected_title = "Hours per month from #{since.strftime(expected_format)} to #{before.strftime(expected_format)}"
       group = subject.monthly(filters)
       assert_equal expected_title, group.title
