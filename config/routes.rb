@@ -10,4 +10,8 @@ Rails.application.routes.draw do
 
   get '/stats/daily', to: 'entries_stat_groups#daily'
   get '/stats/monthly', to: 'entries_stat_groups#monthly'
+
+  namespace :teamwork do
+    resources :domains, only: %i{ index create update destroy }
+  end
 end
