@@ -10,7 +10,7 @@ describe UsersController do
       ]
       get '/users'
       assert_response :success
-      response.body.must_equal serialized(users.sort_by(&:name), UserSerializer)
+      assert_equal serialized(users.sort_by(&:name), UserSerializer), response.body
     end
   end
 end

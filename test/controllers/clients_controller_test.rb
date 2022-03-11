@@ -74,7 +74,7 @@ describe ClientsController do
         post "/clients", headers: headers, params: params
         assert_response :unprocessable_entity
         parsed = JSON.parse(response.body)
-        parsed['errors'].wont_be_empty
+        refute_empty parsed['errors']
         assert parsed['errors'].any? { | error| error['source']['pointer'] == '/data/attributes/name' }
       end
     end
@@ -121,7 +121,7 @@ describe ClientsController do
         patch "/clients/#{client.id}", headers: headers, params: params
         assert_response :unprocessable_entity
         parsed = JSON.parse(response.body)
-        parsed['errors'].wont_be_empty
+        refute_empty parsed['errors']
         assert parsed['errors'].any? { | error| error['source']['pointer'] == '/data/attributes/name' }
       end
     end
