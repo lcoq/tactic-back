@@ -1,15 +1,16 @@
 module Factories
   def self.factory(type, &block)
-    define_method "#{type}_default_attributes" do
+    formatted_type_for_method = type.to_s.gsub(/\//, '_')
+    define_method "#{formatted_type_for_method}_default_attributes" do
       block ? block.() : {}
     end
-    define_method "build_#{type}" do |attributes|
+    define_method "build_#{formatted_type_for_method}" do |attributes|
       build_record type, attributes
     end
-    define_method "create_#{type}" do |attributes|
+    define_method "create_#{formatted_type_for_method}" do |attributes|
       create_record type, attributes
     end
-    define_method "save_#{type}" do |record|
+    define_method "save_#{formatted_type_for_method}" do |record|
       save_record record
     end
   end
@@ -42,11 +43,19 @@ module Factories
     { title: "My entries stat group", nature: "hour/month", entries_stats: [] }
   end
 
+  factory 'teamwork/domain' do
+    { name: "Tactic", alias: "tc", token: "my-token" }
+  end
+
+  factory 'teamwork/time_entry' do
+    { time_entry_id: 12345 }
+  end
+
   private
 
   def build_record(type, attributes)
     klass = type.to_s.classify.constantize
-    default_attributes = public_send("#{type}_default_attributes")
+    default_attributes = public_send("#{type_for_method(type)}_default_attributes")
     klass.new default_attributes.merge(attributes)
   end
 
@@ -58,5 +67,9 @@ module Factories
 
   def save_record(record)
     assert record.save
+  end
+
+  def type_for_method(type)
+    type.to_s.gsub(/\//, '_')
   end
 end

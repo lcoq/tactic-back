@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170126155219) do
+ActiveRecord::Schema.define(version: 20220310151652) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -56,6 +56,27 @@ ActiveRecord::Schema.define(version: 20170126155219) do
     t.index ["user_id"], name: "index_sessions_on_user_id", using: :btree
   end
 
+  create_table "teamwork_domains", force: :cascade do |t|
+    t.integer  "user_id",    null: false
+    t.string   "name",       null: false
+    t.string   "alias",      null: false
+    t.string   "token",      null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["alias"], name: "index_teamwork_domains_on_alias", using: :btree
+    t.index ["name"], name: "index_teamwork_domains_on_name", using: :btree
+    t.index ["user_id"], name: "index_teamwork_domains_on_user_id", using: :btree
+  end
+
+  create_table "teamwork_time_entries", force: :cascade do |t|
+    t.integer  "entry_id",      null: false
+    t.bigint   "time_entry_id", null: false
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.index ["entry_id"], name: "index_teamwork_time_entries_on_entry_id", unique: true, using: :btree
+    t.index ["time_entry_id"], name: "index_teamwork_time_entries_on_time_entry_id", unique: true, using: :btree
+  end
+
   create_table "users", force: :cascade do |t|
     t.string   "name",               null: false
     t.datetime "created_at",         null: false
@@ -64,4 +85,6 @@ ActiveRecord::Schema.define(version: 20170126155219) do
     t.string   "encrypted_password", null: false
   end
 
+  add_foreign_key "teamwork_domains", "users"
+  add_foreign_key "teamwork_time_entries", "entries"
 end
