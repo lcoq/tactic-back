@@ -41,4 +41,9 @@ describe Teamwork::Domain do
     subject.token = nil
     refute subject.valid?
   end
+  it 'is destroyed when a user is destroyed' do
+    assert subject.save
+    user.destroy
+    refute Teamwork::Domain.find_by(id: subject.id)
+  end
 end
