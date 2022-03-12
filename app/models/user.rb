@@ -8,7 +8,8 @@ class User < ApplicationRecord
   end
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
-  validates :password, presence: true, length: { minimum: 8 }, unless: :persisted?
+  validates :password, presence: true, unless: :persisted?
+  validates :password, length: { minimum: 8 }, allow_blank: true
 
   default_scope { order(:name) }
 

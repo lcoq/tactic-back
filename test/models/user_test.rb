@@ -33,6 +33,11 @@ describe User do
       subject.password = '1234567'
       refute subject.valid?
     end
+    it 'password must have 8 characters for update' do
+      save_user subject
+      subject.password = '123'
+      refute subject.valid?
+    end
     it 'encrypted password is generated with a uniq salt' do
       ingrid = create_user(name: 'Ingrid', password: subject.password)
       save_user subject
