@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   get 'sessions' => 'sessions#show'
-  resources :users, only: :index
+  resources :users, only: %i{ index show update }
   resources :sessions, only: :create
   resources :projects, only: %i{ index show create update destroy }
   resources :clients, only: %i{ index create update destroy }

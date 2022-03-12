@@ -21,7 +21,7 @@ class User < ApplicationRecord
   end
 
   def password=(new_password)
-    return unless new_password
+    return unless new_password.present?
     self.salt = nil
     self.encrypted_password = nil
     @password = new_password
