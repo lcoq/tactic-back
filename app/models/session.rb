@@ -15,10 +15,6 @@ class Session < ApplicationRecord
 
   attr_accessor :password
 
-  def name
-    user.name if user
-  end
-
   private
 
   def user_authenticate_with_password

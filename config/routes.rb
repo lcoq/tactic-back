@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   get 'sessions' => 'sessions#show'
   resources :users, only: %i{ index show update }
+  resources :user_configs, only: %i{ index update }, path: '/users/:user_id/configs'
   resources :sessions, only: :create
   resources :projects, only: %i{ index show create update destroy }
   resources :clients, only: %i{ index create update destroy }

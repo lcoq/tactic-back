@@ -36,6 +36,10 @@ class User < ApplicationRecord
     entries.running
   end
 
+  def configs
+    super || {}
+  end
+
   private
 
   def encrypt_password

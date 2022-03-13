@@ -18,6 +18,9 @@ describe User do
     subject.name = create_user(name: 'uniqueness-test').name.upcase
     refute subject.valid?
   end
+  it 'configs is a Hash' do
+    assert subject.configs.kind_of?(Hash)
+  end
   describe 'Password' do
     it 'needs a password on create' do
       subject = build_user(name: 'louis', password: nil)

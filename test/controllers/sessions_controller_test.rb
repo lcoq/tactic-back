@@ -1,6 +1,7 @@
 require 'test_helper'
 
 describe SessionsController do
+
   describe '#show' do
     it 'is forbidden with invalid Authorization header' do
       get '/sessions', headers: { 'Authorization' => 'invalid' }
@@ -13,7 +14,15 @@ describe SessionsController do
       assert_response :success
       assert_equal serialized(session, SessionSerializer), response.body
     end
+    it 'may include user and user.configs' do
+      session = build_session(user: create_user(name: 'louis'), token: 'session-token')
+      assert session.save
+      get '/sessions?include=user,user.configs', headers: { 'Authorization' => 'session-token' }
+      assert_response :success
+      assert_equal serialized(session, SessionSerializer, { include: 'user,user.configs'}), response.body
+    end
   end
+
   describe '#create' do
     let(:user) { create_user(name: 'louis', password: 'my-password') }
     let(:params) do
@@ -56,5 +65,12 @@ describe SessionsController do
       body = JSON.parse(response.body)
       refute body['errors'].empty?
     end
+    it 'may include user and user.configs' do
+      post '/sessions?include=user,user.configs', params: params
+      assert_response :success
+      session = Session.find_by(user: user)
+      assert_equal serialized(session, SessionSerializer, { include: 'user,user.configs'}), response.body
+    end
   end
+
 end

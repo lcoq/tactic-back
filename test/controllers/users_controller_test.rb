@@ -33,6 +33,11 @@ describe UsersController do
       assert_response :success
       assert_equal serialized(user, UserSerializer), response.body
     end
+    it 'may includes configs' do
+      get "/users/#{user.id}?include=configs", headers: headers
+      assert_response :success
+      assert_equal serialized(user, UserSerializer, include: 'configs'), response.body
+    end
   end
 
   describe '#update' do

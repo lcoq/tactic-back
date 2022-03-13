@@ -9,7 +9,7 @@ class UsersController < ApplicationController
 
   def show
     @user = current_user
-    render json: @user
+    render json: @user, include: show_include_params
   end
 
   def update
@@ -33,6 +33,16 @@ class UsersController < ApplicationController
   def update_params
     authorized = %w{ name password }
     ActiveModelSerializers::Deserialization.jsonapi_parse!(params, only: authorized)
+  end
+
+  def show_include_params
+    authorized = %w{ configs }
+    include = show_params['include']
+    include if include.present? && (include.split(',') - authorized).empty?
+  end
+
+  def show_params
+    params.permit('id', 'include')
   end
 
 end
