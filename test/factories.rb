@@ -47,6 +47,10 @@ module Factories
     { name: "Tactic", alias: "tc", token: "my-token" }
   end
 
+  factory 'teamwork/user_config_set' do
+    { set: { 'test' => true } }
+  end
+
   factory 'teamwork/time_entry' do
     { time_entry_id: 12345 }
   end

@@ -14,5 +14,6 @@ Rails.application.routes.draw do
 
   namespace :teamwork do
     resources :domains, only: %i{ index create update destroy }
+    resources :user_configs, only: %i{ index update }, path: '/configs'
   end
 end

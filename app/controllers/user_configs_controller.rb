@@ -11,8 +11,6 @@ class UserConfigsController < ApplicationController
     @config = UserConfig.find_for_user(current_user, params[:id])
     if @config.update_value(update_params[:value])
       render json: @config
-    else
-      # TODO ?
     end
   end
 

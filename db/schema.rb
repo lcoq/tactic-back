@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20220313093405) do
+ActiveRecord::Schema.define(version: 20220314134033) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -77,6 +77,14 @@ ActiveRecord::Schema.define(version: 20220313093405) do
     t.index ["time_entry_id"], name: "index_teamwork_time_entries_on_time_entry_id", unique: true, using: :btree
   end
 
+  create_table "teamwork_user_config_sets", force: :cascade do |t|
+    t.integer  "user_id",                 null: false
+    t.json     "set",        default: {}, null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+    t.index ["user_id"], name: "index_teamwork_user_config_sets_on_user_id", using: :btree
+  end
+
   create_table "users", force: :cascade do |t|
     t.string   "name",               null: false
     t.datetime "created_at",         null: false
@@ -88,4 +96,5 @@ ActiveRecord::Schema.define(version: 20220313093405) do
 
   add_foreign_key "teamwork_domains", "users"
   add_foreign_key "teamwork_time_entries", "entries"
+  add_foreign_key "teamwork_user_config_sets", "users"
 end
