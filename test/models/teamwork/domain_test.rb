@@ -24,9 +24,10 @@ describe Teamwork::Domain do
     create_teamwork_domain(user: other_user, name: subject.name, alias: 'other-alias', token: 'other-token')
     assert subject.valid?
   end
-  it 'needs an alias' do
-    subject.alias = nil
-    refute subject.valid?
+  it 'alias is set to its name when empty' do
+    subject.alias = ''
+    assert subject.save
+    assert_equal subject.name, subject.alias
   end
   it 'alias is unique by user' do
     create_teamwork_domain(user: user, name: 'other-name', alias: subject.alias, token: 'other-token')
