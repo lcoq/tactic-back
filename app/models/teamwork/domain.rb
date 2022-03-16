@@ -1,5 +1,6 @@
 class Teamwork::Domain < ApplicationRecord
   belongs_to :user
+  has_many :time_entries, dependent: :destroy, foreign_key: 'teamwork_domain_id'
 
   before_validation :set_alias_to_name
 

@@ -98,4 +98,16 @@ describe Teamwork::UserConfig do
     end
   end
 
+  describe 'Class methods' do
+    subject { Teamwork::UserConfig }
+
+    it 'builds config for each definitions' do
+      results = subject.list_for_user(user)
+      assert_equal Teamwork::UserConfig::DEFINITIONS.length, results.length
+      Teamwork::UserConfig::DEFINITIONS.each_with_index do |definition, index|
+        assert_equal definition, results[index].definition
+      end
+    end
+  end
+
 end

@@ -9,6 +9,16 @@ module Teamwork
         description: "Enable to automatically replace teamwork task URLs in entry title with the Teamwork task id and name",
         default: true
       },
+      {
+        name: 'teamwork task time entry synchronization',
+        description: "Enable to automatically synchronize stopped entries with Teamwork task time entries",
+        default: false
+      },
+      {
+        name: 'teamwork task time entry rounding',
+        description: "Enable to send rounded entries durations to Teamwork (require Teamwork task time entry synchronization)",
+        default: false
+      }
     ]
 
     def self.list_for_user(user)

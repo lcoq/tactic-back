@@ -12,7 +12,7 @@ describe Teamwork::EntryUpdater do
   end
   subject { Teamwork::EntryUpdater.new(entry, current_user: current_user) }
 
-  describe '#update' do
+  describe 'Simple update' do
     it 'succeeds' do
       assert subject.update(title: "My new title")
     end
@@ -24,16 +24,19 @@ describe Teamwork::EntryUpdater do
       entry.reload
       assert_equal "My new title", entry.title
     end
+  end
+
+  describe 'Update with task URL' do
+    let(:task_url) { "https://tactic.teamwork.com/#/tasks/54321" }
+    before { teamwork_domain }
+
     it 'does not replace task URL in entry title with task name when user has disabled config' do
       Teamwork::UserConfig.find_for_user(current_user, 'teamwork-task-url-replace').update_value(false)
-      teamwork_domain
-      task_url = "https://tactic.teamwork.com/#/tasks/54321"
       subject.update title: task_url
       entry.reload
       assert_equal task_url, entry.title
     end
     it 'replaces task URL in entry title with teamwork task identifier and task description' do
-      teamwork_domain
       task_url = "https://tactic.teamwork.com/#/tasks/54321"
       response = success_api_response('task' => { 'name' => "My task name" })
       with_api_agent_stub :get_task, response, ['54321', { query: { 'fields[task]' => 'name' } }] do |mock|
@@ -43,7 +46,6 @@ describe Teamwork::EntryUpdater do
       assert_equal "[tc/54321] My task name", entry.title
     end
     it 'replaces task URL in entry title with only teamwork task identifier when API is not available' do
-      teamwork_domain
       task_url = "https://tactic.teamwork.com/#/tasks/54321"
       response = failure_api_response
       with_api_agent_stub :get_task, response, ['54321', { query: { 'fields[task]' => 'name' } }] do |mock|
@@ -51,6 +53,20 @@ describe Teamwork::EntryUpdater do
       end
       entry.reload
       assert_equal "[tc/54321] ", entry.title
+    end
+  end
+
+  describe 'Update with time entry synchronization' do
+    before do
+      Teamwork::UserConfig.find_for_user(current_user, 'teamwork-task-time-entry-synchronization').update_value(true)
+    end
+    it 'calls the TimeEntrySynchronizer' do
+      mock = Minitest::Mock.new
+      mock.expect :call, true, [entry, {user: current_user}]
+      Teamwork::TimeEntrySynchronizer.stub :synchronize, mock do
+        subject.update title: "New title"
+      end
+      mock.verify
     end
   end
 
@@ -63,6 +79,20 @@ describe Teamwork::EntryUpdater do
       assert entry.save
       assert subject.destroy
       refute Entry.find_by(id: entry.id)
+    end
+    describe 'Update with time entry synchronization' do
+      before do
+        Teamwork::UserConfig.find_for_user(current_user, 'teamwork-task-time-entry-synchronization').update_value(true)
+      end
+      it 'calls the TimeEntrySynchronizer' do
+        assert entry.save
+        mock = Minitest::Mock.new
+        mock.expect :call, true, [entry, {user: current_user}]
+        Teamwork::TimeEntrySynchronizer.stub :destroy, mock do
+          subject.destroy
+        end
+        mock.verify
+      end
     end
   end
 

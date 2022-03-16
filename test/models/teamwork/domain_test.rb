@@ -42,9 +42,15 @@ describe Teamwork::Domain do
     subject.token = nil
     refute subject.valid?
   end
+  it 'destroys its time entries' do
+    subject.destroy
+    refute Teamwork::TimeEntry.find_by(id: subject.id)
+  end
   it 'is destroyed when a user is destroyed' do
     assert subject.save
-    user.destroy
-    refute Teamwork::Domain.find_by(id: subject.id)
+    entry = create_entry({ user: user })
+    time_entry = create_teamwork_time_entry(entry: entry, domain: subject, time_entry_id: 12345)
+    subject.destroy
+    refute Teamwork::TimeEntry.find_by(id: time_entry.id)
   end
 end

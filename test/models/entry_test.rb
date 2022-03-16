@@ -49,23 +49,100 @@ describe Entry do
     assert_nil subject.duration
   end
 
-  it 'rounded started at is rounded to 5 minutes' do
-    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_started_at
-    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:59", "28/06/2018 16:26:00").rounded_started_at
-    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_started_at
-    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:00").rounded_started_at
+  describe 'Rounding' do
+    it 'rounded started at rounds to 5 minutes by default' do
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_started_at
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:59", "28/06/2018 16:26:00").rounded_started_at
+      assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_started_at
+      assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:00").rounded_started_at
+    end
+    it 'rounded started at rounds to 1 minute' do
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:00", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:29", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:31", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:59", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+    end
+    it 'rounded started at rounds to nearest 1 minute' do
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:00", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:29", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 15:22:00"), build_entry_with_times("28/06/2018 15:21:30", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 15:22:00"), build_entry_with_times("28/06/2018 15:21:59", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+    end
+    it 'rounded started at rounds to nearest 5 minutes' do
+      assert_equal parse_time("28/06/2018 15:20:00"), build_entry_with_times("28/06/2018 15:20:01", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 15:20:00"), build_entry_with_times("28/06/2018 15:22:29", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:22:30", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:24:59", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+    end
+    it 'rounded duration is rounded to 5 minutes by default' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:30:00").rounded_duration
+    end
+    it 'rounded duration rounds to 1 minute' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:00").rounded_duration(round_minutes: 1)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:01").rounded_duration(round_minutes: 1)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration(round_minutes: 1)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration(round_minutes: 1)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:59").rounded_duration(round_minutes: 1)
+    end
+    it 'rounded duration rounds to nearest 1 minute' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:00").rounded_duration(round_minutes: 1, nearest: true)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:29").rounded_duration(round_minutes: 1, nearest: true)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:30").rounded_duration(round_minutes: 1, nearest: true)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration(round_minutes: 1, nearest: true)
+    end
+    it 'rounded duration rounds to nearest 5 minutes' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:01").rounded_duration(round_minutes: 5, nearest: true)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:27:29").rounded_duration(round_minutes: 5, nearest: true)
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:27:30").rounded_duration(round_minutes: 5, nearest: true)
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration(round_minutes: 5, nearest: true)
+    end
+    it 'rounded stopped at is rounded to 5 minutes by default according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at
+    end
+    it 'rounded stopped at is rounded to 1 minute according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at(round_minutes: 1)
+    end
+    it 'rounded stopped at is rounded to nearest 1 minute according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 16:27:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at(round_minutes: 1, nearest: true)
+    end
+    it 'rounded stopped at is rounded to nearest 5 minutes according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:27:29").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:27:30").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:30", "28/06/2018 16:27:30").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:27:28").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:27:29").rounded_stopped_at(round_minutes: 5, nearest: true)
+    end
   end
-  it 'rounded duration is rounded to 5 minutes' do
-    assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration
-    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration
-    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration
-    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:30:00").rounded_duration
+
+  it 'is stopped? with stopped at' do
+    subject.stopped_at = Time.zone.now
+    assert subject.stopped?
   end
-  it 'rounded stopped at is rounded to 5 minutes according to started at rounded and duration' do
-    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at
-    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at
-    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at
-    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at
+  it 'is not stopped? without stopped at' do
+    subject.stopped_at = nil
+    refute subject.stopped?
+  end
+
+  it 'is running? without stopped at' do
+    subject.stopped_at = nil
+    assert subject.running?
+  end
+  it 'is not running? with stopped at' do
+    subject.stopped_at = Time.zone.now
+    refute subject.running?
   end
 
   describe 'Class methods' do

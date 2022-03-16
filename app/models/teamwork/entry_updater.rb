@@ -15,12 +15,26 @@ module Teamwork
 
     def update(attributes)
       entry.assign_attributes attributes
-      replace_teamwork_url_from_title if entry.title_changed?
-      entry.save
+
+      if entry.title_changed?
+        replace_teamwork_url_from_title
+      end
+
+      if entry.save
+        synchronize_teamwork_time
+        true
+      else
+        false
+      end
     end
 
     def destroy
-      entry.destroy
+      if entry.destroy
+        destroy_teamwork_time
+        true
+      else
+        false
+      end
     end
 
     private
@@ -33,6 +47,16 @@ module Teamwork
         domains: domains,
         replace_task_url: replace_task_url
       )
+    end
+
+    def synchronize_teamwork_time
+      return unless Teamwork::UserConfig.find_for_user(current_user, 'teamwork-task-time-entry-synchronization').value
+      TimeEntrySynchronizer.synchronize entry, user: current_user
+    end
+
+    def destroy_teamwork_time
+      return unless Teamwork::UserConfig.find_for_user(current_user, 'teamwork-task-time-entry-synchronization').value
+      TimeEntrySynchronizer.destroy entry, user: current_user
     end
 
   end

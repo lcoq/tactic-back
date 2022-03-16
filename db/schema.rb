@@ -69,11 +69,13 @@ ActiveRecord::Schema.define(version: 20220314134033) do
   end
 
   create_table "teamwork_time_entries", force: :cascade do |t|
-    t.integer  "entry_id",      null: false
-    t.bigint   "time_entry_id", null: false
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
+    t.integer  "entry_id",           null: false
+    t.integer  "teamwork_domain_id", null: false
+    t.bigint   "time_entry_id",      null: false
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
     t.index ["entry_id"], name: "index_teamwork_time_entries_on_entry_id", unique: true, using: :btree
+    t.index ["teamwork_domain_id"], name: "index_teamwork_time_entries_on_teamwork_domain_id", using: :btree
     t.index ["time_entry_id"], name: "index_teamwork_time_entries_on_time_entry_id", unique: true, using: :btree
   end
 
@@ -96,5 +98,6 @@ ActiveRecord::Schema.define(version: 20220314134033) do
 
   add_foreign_key "teamwork_domains", "users"
   add_foreign_key "teamwork_time_entries", "entries"
+  add_foreign_key "teamwork_time_entries", "teamwork_domains"
   add_foreign_key "teamwork_user_config_sets", "users"
 end
