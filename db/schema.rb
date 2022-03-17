@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20220314134033) do
+ActiveRecord::Schema.define(version: 20220316174726) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,21 @@ ActiveRecord::Schema.define(version: 20220314134033) do
     t.boolean  "archived",   default: false, null: false
     t.index ["archived"], name: "index_clients_on_archived", using: :btree
     t.index ["name"], name: "index_clients_on_name", unique: true, using: :btree
+  end
+
+  create_table "delayed_jobs", force: :cascade do |t|
+    t.integer  "priority",   default: 0, null: false
+    t.integer  "attempts",   default: 0, null: false
+    t.text     "handler",                null: false
+    t.text     "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string   "locked_by"
+    t.string   "queue"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
   end
 
   create_table "entries", force: :cascade do |t|
@@ -97,7 +112,6 @@ ActiveRecord::Schema.define(version: 20220314134033) do
   end
 
   add_foreign_key "teamwork_domains", "users"
-  add_foreign_key "teamwork_time_entries", "entries"
   add_foreign_key "teamwork_time_entries", "teamwork_domains"
   add_foreign_key "teamwork_user_config_sets", "users"
 end

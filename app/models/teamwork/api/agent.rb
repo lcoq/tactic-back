@@ -82,7 +82,8 @@ module Teamwork
             'Content-Type' => 'application/json',
             'Accept'=> 'application/json'
           },
-          logger: Rails.logger
+          logger: Rails.logger,
+          timeout: 10
         }
       end
 

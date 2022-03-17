@@ -41,4 +41,8 @@ describe Teamwork::TimeEntry do
     subject.time_entry_id = other_time_entry.time_entry_id
     refute subject.valid?
   end
+  it 'Entry#destroy does not raises with a TimeEntry' do
+    assert subject.save
+    entry.destroy
+  end
 end

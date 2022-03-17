@@ -53,7 +53,13 @@ GEM
     crack (0.4.5)
       rexml
     crass (1.0.6)
+    daemons (1.4.1)
     database_cleaner (1.5.3)
+    delayed_job (4.1.10)
+      activesupport (>= 3.0, < 8.0)
+    delayed_job_active_record (4.1.7)
+      activerecord (>= 3.0, < 8.0)
+      delayed_job (>= 3.0, < 5)
     erubis (2.7.0)
     ffi (1.9.14)
     formatador (0.2.5)
@@ -183,7 +189,9 @@ PLATFORMS
 DEPENDENCIES
   active_model_serializers (~> 0.10.0)
   byebug
+  daemons
   database_cleaner
+  delayed_job_active_record
   guard
   guard-minitest
   httparty

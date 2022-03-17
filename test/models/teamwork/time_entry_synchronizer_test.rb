@@ -341,6 +341,76 @@ describe Teamwork::TimeEntrySynchronizer do
     end
   end
 
+  describe 'With unavailable API' do
+    it '#synchronize! raises' do
+      response = failure_api_response
+      expected_attributes = {
+        description: "My description",
+        taskId: 54321,
+        date: '2022-03-15',
+        time: '19:00:00',
+        hours: 1,
+        minutes: 1
+      }
+      with_api_agent_stub :post_task_time, response, ['54321', { attributes: expected_attributes } ] do
+        assert_raises(Teamwork::TimeEntrySynchronizer::SynchroError) do
+          subject.synchronize!
+        end
+      end
+    end
+    it '#synchronize creates a background job' do
+      delayed_job_mock = Minitest::Mock.new
+      delayed_job_mock.expect :call, true do |job|
+        job.kind_of?(Teamwork::TimeEntrySynchronizeJob) &&
+          job.entry_id == entry.id &&
+          job.user_id == user.id
+      end
+      response = failure_api_response
+      expected_attributes = {
+        description: "My description",
+        taskId: 54321,
+        date: '2022-03-15',
+        time: '19:00:00',
+        hours: 1,
+        minutes: 1
+      }
+
+      with_api_agent_stub :post_task_time, response, ['54321', { attributes: expected_attributes } ] do
+        Delayed::Job.stub :enqueue, delayed_job_mock do
+          subject.synchronize
+        end
+      end
+
+      delayed_job_mock.verify
+    end
+    it '#destroy! raises' do
+      time_entry = create_teamwork_time_entry({ entry: entry, domain: tactic_domain, time_entry_id: 15243 })
+      response = failure_api_response
+      with_api_agent_stub :delete_task_time, response, [15243] do
+        assert_raises(Teamwork::TimeEntrySynchronizer::SynchroError) do
+          subject.destroy!
+        end
+      end
+    end
+    it '#destroy creates a background job' do
+      time_entry = create_teamwork_time_entry({ entry: entry, domain: tactic_domain, time_entry_id: 15243 })
+
+      delayed_job_mock = Minitest::Mock.new
+      delayed_job_mock.expect :call, true do |job|
+        job.kind_of?(Teamwork::TimeEntryDestroyJob) &&
+          job.time_entry_id == time_entry.id
+      end
+      response = failure_api_response
+      with_api_agent_stub :delete_task_time, response, [15243] do
+        Delayed::Job.stub :enqueue, delayed_job_mock do
+          subject.destroy
+        end
+      end
+
+      delayed_job_mock.verify
+    end
+  end
+
   def success_api_response(body)
     raw_response = OpenStruct.new(code: 200, body: body.to_json)
     Teamwork::Api::Response.new raw_response
