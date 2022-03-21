@@ -1,7 +1,13 @@
 Rails.application.routes.draw do
   get 'sessions' => 'sessions#show'
+
   resources :users, only: %i{ index show update }
   resources :user_configs, only: %i{ index update }, path: '/users/:user_id/configs'
+
+  get '/users/:user_id/notification_lists/latest', to: 'user_notification_lists#latest'
+  patch '/users/:user_id/notification_lists/:id', to: 'user_notification_lists#update'
+  delete '/users/:user_id/notifications/:id', to: 'user_notifications#destroy'
+
   resources :sessions, only: :create
   resources :projects, only: %i{ index show create update destroy }
   resources :clients, only: %i{ index create update destroy }

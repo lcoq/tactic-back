@@ -124,6 +124,12 @@ describe User do
       subject.destroy
       assert_raises(ActiveRecord::RecordNotFound) { entry.reload }
     end
+    it 'destroys its notifications on destroy' do
+      assert subject.save
+      notification = create_user_notification(user: subject)
+      subject.destroy
+      assert_raises(ActiveRecord::RecordNotFound) { notification.reload }
+    end
   end
 
   describe 'Class methods' do

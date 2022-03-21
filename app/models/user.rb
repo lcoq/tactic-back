@@ -1,5 +1,6 @@
 class User < ApplicationRecord
 
+  has_many :notifications, class_name: 'UserNotification', dependent: :destroy
   has_many :sessions, dependent: :destroy
   has_many :entries, dependent: :destroy do
     def running

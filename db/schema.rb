@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20220316174726) do
+ActiveRecord::Schema.define(version: 20220321094812) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -102,6 +102,9 @@ ActiveRecord::Schema.define(version: 20220316174726) do
     t.index ["user_id"], name: "index_teamwork_user_config_sets_on_user_id", using: :btree
   end
 
+# Could not dump table "user_notifications" because of following StandardError
+#   Unknown type 'user_notification_nature' for column 'nature'
+
   create_table "users", force: :cascade do |t|
     t.string   "name",               null: false
     t.datetime "created_at",         null: false
@@ -114,4 +117,5 @@ ActiveRecord::Schema.define(version: 20220316174726) do
   add_foreign_key "teamwork_domains", "users"
   add_foreign_key "teamwork_time_entries", "teamwork_domains"
   add_foreign_key "teamwork_user_config_sets", "users"
+  add_foreign_key "user_notifications", "users"
 end

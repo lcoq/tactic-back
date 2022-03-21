@@ -55,6 +55,10 @@ module Factories
     { time_entry_id: 12345 }
   end
 
+  factory :user_notification do
+    { title: "My user notification title", message: "My user notification message" }
+  end
+
   private
 
   def build_record(type, attributes)
