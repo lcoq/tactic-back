@@ -321,6 +321,25 @@ describe EntriesController do
     end
   end
 
+  describe '#show' do
+    let(:entry) { create_entry(user: user, title: 'initial entry title') }
+    it 'is forbidden with invalid Authorization header' do
+      get "/entries/#{entry.id}", headers: { 'Authorization' => 'invalid' }
+      assert_response :forbidden
+    end
+    it 'serialize the entry' do
+      get "/entries/#{entry.id}", headers: headers
+      assert_response :success
+      assert_equal serialized(entry, EntrySerializer), response.body
+    end
+    it 'includes projects' do
+      project = create_project(name: 'Tactic')
+      get "/entries/#{entry.id}", headers: headers, params: { 'include' => 'project' }
+      assert_response :success
+      assert_equal serialized(entry, EntrySerializer, include: 'project'), response.body
+    end
+  end
+
   describe '#create' do
     let(:project) { create_project(name: 'tictoc') }
     let(:params) do

@@ -31,6 +31,11 @@ class EntriesController < ApplicationController
     end
   end
 
+  def show
+    @entry = Entry.find(params[:id])
+    render json: @entry
+  end
+
   def create
     @entry = Entry.new(user: current_user)
     if EntryUpdater.for(@entry, current_user: current_user).update(create_params)
