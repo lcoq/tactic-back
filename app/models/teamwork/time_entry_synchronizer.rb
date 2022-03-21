@@ -62,7 +62,14 @@ module Teamwork
     def destroy(*args)
       destroy! *args
     rescue SynchroError => error
-      Delayed::Job.enqueue Teamwork::TimeEntryDestroyJob.new(time_entry.id)
+      hours, minutes = entry && duration && get_hours_and_minutes_from_duration(duration)
+      job = Teamwork::TimeEntryDestroyJob.new(
+        time_entry.id,
+        entry_title: entry && entry.title,
+        entry_duration: hours && minutes && "#{hours}h#{"%02.f" % minutes}min",
+        entry_started_at: entry && entry.started_at,
+      )
+      Delayed::Job.enqueue job
       false
     end
 

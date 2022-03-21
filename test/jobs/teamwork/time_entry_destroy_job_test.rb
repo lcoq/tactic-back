@@ -23,5 +23,22 @@ describe Teamwork::TimeEntryDestroyJob do
     end
   end
 
-  it 'notify the user on failure'
+  it 'notify the user on failure' do
+    now = Time.zone.now
+
+    subject.new(
+      time_entry.id,
+      entry_title: "[tc/12345] My entry title",
+      entry_duration: "01:35",
+      entry_started_at: now
+    ).failure(subject)
+
+    notif = UserNotification.where(user: user).first
+    assert notif
+    assert_equal 'error', notif.nature
+    assert_not_empty notif.message
+    assert_match "My entry title", notif.message
+    assert_match "01:35", notif.message
+    assert_match "https://tactic.teamwork.com/#/tasks/12345", notif.message
+  end
 end

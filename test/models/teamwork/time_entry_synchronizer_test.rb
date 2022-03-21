@@ -398,7 +398,9 @@ describe Teamwork::TimeEntrySynchronizer do
       delayed_job_mock = Minitest::Mock.new
       delayed_job_mock.expect :call, true do |job|
         job.kind_of?(Teamwork::TimeEntryDestroyJob) &&
-          job.time_entry_id == time_entry.id
+          job.time_entry_id == time_entry.id &&
+          job.entry_title == entry.title &&
+          job.entry_started_at == entry.started_at
       end
       response = failure_api_response
       with_api_agent_stub :delete_task_time, response, [15243] do

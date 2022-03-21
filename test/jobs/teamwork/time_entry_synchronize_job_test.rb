@@ -22,5 +22,12 @@ describe Teamwork::TimeEntrySynchronizeJob do
     end
   end
 
-  it 'notify the user on failure'
+  it 'notify the user on failure' do
+    subject.new(entry.id, user.id).failure(subject)
+    notif = UserNotification.where(user: user).first
+    assert notif
+    assert_equal entry, notif.resource
+    assert_equal 'error', notif.nature
+    assert_not_empty notif.message
+  end
 end
