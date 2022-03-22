@@ -48,7 +48,7 @@ class EntriesStatGroupBuilder
   end
 
   def build_entries_stats(trunc_type, entries_scope)
-    date_sql = "DATE_TRUNC('#{trunc_type}', entries.started_at AT TIME ZONE '#{TIME_ZONE_ID}') AT TIME ZONE '#{TIME_ZONE_ID}' AS date"
+    date_sql = "DATE_TRUNC('#{trunc_type}', (entries.started_at AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Paris') AS date"
     duration_sql = "SUM(EXTRACT(EPOCH FROM (entries.stopped_at - entries.started_at))) AS duration"
     entries_scope = entries_scope.stopped.select(duration_sql, date_sql).group('date').order('date')
     Entry.connection.select_all(entries_scope.to_sql).map do |line|

@@ -94,6 +94,20 @@ describe EntriesStatGroupBuilder do
       group = subject.daily(filters)
       assert group.entries_stats.all? { |stat| stat.id == stat.date.to_s }
     end
+
+    it 'computes entries stats with the right time zone' do
+      create_entry(
+        user: user,
+        started_at: Time.zone.parse('2022-03-12 00:01:50 +0100'),
+        stopped_at: Time.zone.parse('2022-03-12 00:06:55 +0100')
+      )
+      group = subject.daily(
+        since: Time.zone.parse("2022-03-11T23:00:00.000Z"),
+        before: Time.zone.parse("2022-03-12T22:59:59.999Z"),
+      )
+      assert_equal 1, group.entries_stats.length
+      assert_equal Date.parse('2022-03-12'), group.entries_stats[0].date
+    end
   end
 
   describe '#monthly' do
