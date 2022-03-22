@@ -6,6 +6,9 @@ gem 'pg'
 gem 'puma', '~> 3.12'
 gem 'rack-cors', require: 'rack/cors'
 gem 'active_model_serializers', '~> 0.10.0'
+gem 'httparty'
+gem 'delayed_job_active_record'
+gem 'daemons' # required by delayed_job
 
 group :development, :test do
   gem 'byebug', platform: :mri
@@ -23,6 +26,7 @@ group :test do
   gem 'guard-minitest'
   gem 'minitest-rails'
   gem 'database_cleaner'
+  gem 'webmock'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

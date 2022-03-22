@@ -49,23 +49,100 @@ describe Entry do
     assert_nil subject.duration
   end
 
-  it 'rounded started at is rounded to 5 minutes' do
-    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_started_at
-    assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:59", "28/06/2018 16:26:00").rounded_started_at
-    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_started_at
-    assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:00").rounded_started_at
+  describe 'Rounding' do
+    it 'rounded started at rounds to 5 minutes by default' do
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_started_at
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:25:59", "28/06/2018 16:26:00").rounded_started_at
+      assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_started_at
+      assert_equal parse_time("28/06/2018 15:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:00").rounded_started_at
+    end
+    it 'rounded started at rounds to 1 minute' do
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:00", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:29", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:31", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:59", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1)
+    end
+    it 'rounded started at rounds to nearest 1 minute' do
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:00", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 15:21:00"), build_entry_with_times("28/06/2018 15:21:29", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 15:22:00"), build_entry_with_times("28/06/2018 15:21:30", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 15:22:00"), build_entry_with_times("28/06/2018 15:21:59", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 1, nearest: true)
+    end
+    it 'rounded started at rounds to nearest 5 minutes' do
+      assert_equal parse_time("28/06/2018 15:20:00"), build_entry_with_times("28/06/2018 15:20:01", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 15:20:00"), build_entry_with_times("28/06/2018 15:22:29", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:22:30", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 15:25:00"), build_entry_with_times("28/06/2018 15:24:59", "28/06/2018 16:25:00").rounded_started_at(round_minutes: 5, nearest: true)
+    end
+    it 'rounded duration is rounded to 5 minutes by default' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:30:00").rounded_duration
+    end
+    it 'rounded duration rounds to 1 minute' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:00").rounded_duration(round_minutes: 1)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:01").rounded_duration(round_minutes: 1)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration(round_minutes: 1)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration(round_minutes: 1)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:59").rounded_duration(round_minutes: 1)
+    end
+    it 'rounded duration rounds to nearest 1 minute' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:00").rounded_duration(round_minutes: 1, nearest: true)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:29").rounded_duration(round_minutes: 1, nearest: true)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:30").rounded_duration(round_minutes: 1, nearest: true)
+      assert_equal 1.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration(round_minutes: 1, nearest: true)
+    end
+    it 'rounded duration rounds to nearest 5 minutes' do
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:01").rounded_duration(round_minutes: 5, nearest: true)
+      assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:27:29").rounded_duration(round_minutes: 5, nearest: true)
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:27:30").rounded_duration(round_minutes: 5, nearest: true)
+      assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration(round_minutes: 5, nearest: true)
+    end
+    it 'rounded stopped at is rounded to 5 minutes by default according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at
+    end
+    it 'rounded stopped at is rounded to 1 minute according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at(round_minutes: 1)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at(round_minutes: 1)
+    end
+    it 'rounded stopped at is rounded to nearest 1 minute according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 16:26:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at(round_minutes: 1, nearest: true)
+      assert_equal parse_time("28/06/2018 16:27:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at(round_minutes: 1, nearest: true)
+    end
+    it 'rounded stopped at is rounded to nearest 5 minutes according to started at rounded and duration' do
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:27:29").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:27:30").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:30", "28/06/2018 16:27:30").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:27:28").rounded_stopped_at(round_minutes: 5, nearest: true)
+      assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:27:29").rounded_stopped_at(round_minutes: 5, nearest: true)
+    end
   end
-  it 'rounded duration is rounded to 5 minutes' do
-    assert_equal 0.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:25:59").rounded_duration
-    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:26:00").rounded_duration
-    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:29:59").rounded_duration
-    assert_equal 5.minutes, build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 15:30:00").rounded_duration
+
+  it 'is stopped? with stopped at' do
+    subject.stopped_at = Time.zone.now
+    assert subject.stopped?
   end
-  it 'rounded stopped at is rounded to 5 minutes according to started at rounded and duration' do
-    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:00").rounded_stopped_at
-    assert_equal parse_time("28/06/2018 16:25:00"), build_entry_with_times("28/06/2018 15:25:00", "28/06/2018 16:25:59").rounded_stopped_at
-    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:26:00", "28/06/2018 16:26:00").rounded_stopped_at
-    assert_equal parse_time("28/06/2018 16:30:00"), build_entry_with_times("28/06/2018 15:29:59", "28/06/2018 16:26:59").rounded_stopped_at
+  it 'is not stopped? without stopped at' do
+    subject.stopped_at = nil
+    refute subject.stopped?
+  end
+
+  it 'is running? without stopped at' do
+    subject.stopped_at = nil
+    assert subject.running?
+  end
+  it 'is not running? with stopped at' do
+    subject.stopped_at = Time.zone.now
+    refute subject.running?
   end
 
   describe 'Class methods' do
@@ -76,11 +153,11 @@ describe Entry do
 
       it 'includes entries from current week' do
         entry = create_entry(user: create_user(name: 'louis'), started_at: beginning_of_week + 2.minutes, stopped_at: beginning_of_week + 4.minutes)
-        subject.in_current_week.must_include entry
+        assert_includes subject.in_current_week, entry
       end
       it 'does not include entries from previous weeks' do
         entry = create_entry(user: create_user(name: 'louis'), started_at: beginning_of_week - 4.minutes, stopped_at: beginning_of_week - 2.minutes)
-        subject.in_current_week.wont_include entry
+        refute_includes subject.in_current_week, entry
       end
     end
 
@@ -105,22 +182,24 @@ describe Entry do
       it 'includes entries without project with project_ids nil' do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis)
-        subject.filter(
-          since: entry.created_at.beginning_of_day,
-          before: entry.created_at.end_of_day,
+        results = subject.filter(
+          since: entry.started_at.beginning_of_day,
+          before: entry.started_at.end_of_day,
           user_ids: [ louis.id.to_s ],
           project_ids: [nil]
-        ).must_include entry
+        )
+        assert_includes results, entry
       end
       it 'does not include entries without project without project_ids nil' do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis, project: create_project(name: 'Tactic'))
-        subject.filter(
-          since: entry.created_at.beginning_of_day,
-          before: entry.created_at.end_of_day,
+        results = subject.filter(
+          since: entry.started_at.beginning_of_day,
+          before: entry.started_at.end_of_day,
           user_ids: [ louis.id.to_s ],
           project_ids: [nil]
-        ).wont_include entry
+        )
+        refute_includes results, entry
       end
       it 'includes entries matching query' do
         user = create_user(name: 'louis')
@@ -134,7 +213,7 @@ describe Entry do
           create_entry(user: user, title: "tâche après", started_at: since + 1.second, stopped_at: since + 2.seconds),
           create_entry(user: user, title: "avant tâche après", started_at: since + 1.second, stopped_at: since + 2.seconds)
         ]
-        (entries - subject.filter(since: since, before: before, query: "tâch")).must_be_empty
+        assert_empty(entries - subject.filter(since: since, before: before, query: "tâch"))
       end
       it 'does not include entries not matching query' do
         user = create_user(name: 'louis')
@@ -142,7 +221,7 @@ describe Entry do
         before = Time.zone.now.end_of_day
         create_entry(user: user, title: "un truc qui n'a rien à voir", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "tâc", started_at: since + 1.second, stopped_at: since + 2.seconds)
-        subject.filter(since: since, before: before, query: "tâch").must_be_empty
+        assert_empty subject.filter(since: since, before: before, query: "tâch")
       end
       it 'includes entries matching OR query' do
         user = create_user(name: 'louis')
@@ -153,7 +232,7 @@ describe Entry do
           create_entry(user: user, title: "à faire", started_at: since + 1.second, stopped_at: since + 2.seconds),
           create_entry(user: user, title: "une tâche à faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
         ]
-        (entries - subject.filter(since: since, before: before, query: "tâche | faire")).must_be_empty
+        assert_empty(entries - subject.filter(since: since, before: before, query: "tâche | faire"))
       end
       it 'does not include entries not matching OR query' do
         user = create_user(name: 'louis')
@@ -161,7 +240,7 @@ describe Entry do
         before = Time.zone.now.end_of_day
         create_entry(user: user, title: "un truc qui n'a rien à voir", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "tâc", started_at: since + 1.second, stopped_at: since + 2.seconds)
-        subject.filter(since: since, before: before, query: "tâche | faire").must_be_empty
+        assert_empty subject.filter(since: since, before: before, query: "tâche | faire")
       end
       it 'includes entries matching AND query' do
         user = create_user(name: 'louis')
@@ -170,7 +249,7 @@ describe Entry do
         entries = [
           create_entry(user: user, title: "une tâche qu'il faut faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
         ]
-        (entries - subject.filter(since: since, before: before, query: "qu'il faut faire")).must_be_empty
+        assert_empty(entries - subject.filter(since: since, before: before, query: "qu'il faut faire"))
       end
       it 'does not include entries not matching OR query' do
         user = create_user(name: 'louis')
@@ -180,7 +259,7 @@ describe Entry do
         create_entry(user: user, title: "il faut", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "une tâche qu'il faut", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "faut faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
-        subject.filter(since: since, before: before, query: "qu'il faut faire").must_be_empty
+        assert_empty subject.filter(since: since, before: before, query: "qu'il faut faire")
       end
     end
   end

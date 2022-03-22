@@ -31,9 +31,14 @@ class EntriesController < ApplicationController
     end
   end
 
+  def show
+    @entry = Entry.find(params[:id])
+    render json: @entry
+  end
+
   def create
     @entry = Entry.new(user: current_user)
-    if @entry.update_attributes(create_params)
+    if EntryUpdater.for(@entry, current_user: current_user).update(create_params)
       render json: @entry
     else
       render_record_error @entry
@@ -42,7 +47,7 @@ class EntriesController < ApplicationController
 
   def update
     @entry = Entry.find(params[:id])
-    if @entry.update_attributes(update_params)
+    if EntryUpdater.for(@entry, current_user: current_user).update(update_params)
       render json: @entry
     else
       render_record_error @entry
@@ -51,8 +56,11 @@ class EntriesController < ApplicationController
 
   def destroy
     @entry = Entry.find(params[:id])
-    @entry.destroy
-    render json: @entry
+    if EntryUpdater.for(@entry, current_user: current_user).destroy
+      head :no_content
+    else
+      head :internal_server_error
+    end
   end
 
   private

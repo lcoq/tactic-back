@@ -31,7 +31,11 @@ describe EntryCSV do
       assert_equal entries.length, csv.length
       csv.each_with_index do |row, index|
         assert_equal entries[index].user.name, row['user']
-        assert_equal entries[index].project.try(:client).try(:name), row['client']
+        if row['client']
+          assert_equal entries[index].project.try(:client).try(:name), row['client']
+        else
+          assert_nil entries[index].project.try(:client).try(:name)
+        end
         assert_equal entries[index].project.try(:name), row['project']
         assert_equal entries[index].title, row['title']
         expected_minutes = "%02.f" % (index+2)
@@ -72,7 +76,11 @@ describe EntryCSV do
       assert_equal entries.length, csv.length
       csv.each_with_index do |row, index|
         assert_equal entries[index].user.name, row['user']
-        assert_equal entries[index].project.try(:client).try(:name), row['client']
+        if row['client']
+          assert_equal entries[index].project.try(:client).try(:name), row['client']
+        else
+          assert_nil entries[index].project.try(:client).try(:name)
+        end
         assert_equal entries[index].project.try(:name), row['project']
         assert_equal entries[index].title, row['title']
         expected_minutes = "%02.f" % (index+2)

@@ -24,8 +24,12 @@ class ApplicationController < ActionController::API
   def authenticate_with_token(token)
     @current_session = token.presence && Session.find_by(token: token)
     unless @current_session
-      render json: {}, status: :forbidden
+      render_forbidden
       return false
     end
+  end
+
+  def render_forbidden
+    render json: {}, status: :forbidden
   end
 end

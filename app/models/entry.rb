@@ -42,40 +42,66 @@ class Entry < ApplicationRecord
     stopped_at - started_at
   end
 
-  def round_minutes
-    5
-  end
-
-  def rounded_started_at
+  def rounded_started_at(round_minutes: default_round_minutes, nearest: default_round_nearest)
     return unless started_at.present?
-    minutes = started_at.min
-    rounded = started_at.beginning_of_minute
-    if minutes % round_minutes != 0
-      rounded += (round_minutes - (minutes % round_minutes)).minutes
+    round_minutes = round_minutes.minutes
+    timestamp = started_at.to_i
+    rounded = timestamp - (timestamp % round_minutes)
+    if nearest && timestamp % round_minutes >= (round_minutes / 2)
+      rounded += round_minutes
+    elsif !nearest && (timestamp - (timestamp % 60)) % round_minutes != 0
+      rounded += round_minutes
     end
-    rounded
+    Time.zone.at(rounded)
   end
 
-  def rounded_stopped_at
+  def rounded_stopped_at(round_minutes: default_round_minutes, nearest: default_round_nearest)
     return if running?
-    rounded_started_at + rounded_duration.seconds
+    start = rounded_started_at(round_minutes: round_minutes, nearest: nearest)
+    duration = rounded_duration(round_minutes: round_minutes, nearest: nearest).seconds
+    start + duration
   end
 
-  def rounded_duration
+  def rounded_duration(round_minutes: default_round_minutes, nearest: default_round_nearest)
     return unless duration
-    seconds = duration
-    minutes = (seconds.seconds / 1.minute).truncate
+    seconds = duration.seconds
+    minutes = (seconds / 1.minute).truncate
     rounded = minutes
+    rounded += round_minutes if nearest && (seconds % 60) >= 30
     if minutes % round_minutes != 0
       rounded += (round_minutes - (minutes % round_minutes))
     end
     rounded.minutes.to_i
   end
 
-  private
+  def rounded_duration(round_minutes: default_round_minutes, nearest: default_round_nearest)
+    return unless duration
+    round_minutes = round_minutes.minutes
+    rounded = duration - (duration % round_minutes)
+    if nearest && duration % round_minutes >= (round_minutes / 2)
+      rounded += round_minutes
+    elsif !nearest && (duration - (duration % 60)) % round_minutes != 0
+      rounded += round_minutes
+    end
+    rounded.to_i
+  end
+
+  def stopped?
+    stopped_at.present?
+  end
 
   def running?
-    stopped_at.blank?
+    !stopped?
+  end
+
+  private
+
+  def default_round_minutes
+    5
+  end
+
+  def default_round_nearest
+    false
   end
 
   def stopped_at_is_after_started_at

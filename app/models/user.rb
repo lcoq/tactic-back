@@ -1,5 +1,6 @@
 class User < ApplicationRecord
 
+  has_many :notifications, class_name: 'UserNotification', dependent: :destroy
   has_many :sessions, dependent: :destroy
   has_many :entries, dependent: :destroy do
     def running
@@ -8,7 +9,8 @@ class User < ApplicationRecord
   end
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
-  validates :password, presence: true, length: { minimum: 8 }, unless: :persisted?
+  validates :password, presence: true, unless: :persisted?
+  validates :password, length: { minimum: 8 }, allow_blank: true
 
   default_scope { order(:name) }
 
@@ -21,7 +23,7 @@ class User < ApplicationRecord
   end
 
   def password=(new_password)
-    return unless new_password
+    return unless new_password.present?
     self.salt = nil
     self.encrypted_password = nil
     @password = new_password
@@ -33,6 +35,10 @@ class User < ApplicationRecord
 
   def running_entry
     entries.running
+  end
+
+  def configs
+    super || {}
   end
 
   private

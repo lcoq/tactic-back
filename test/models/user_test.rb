@@ -18,6 +18,9 @@ describe User do
     subject.name = create_user(name: 'uniqueness-test').name.upcase
     refute subject.valid?
   end
+  it 'configs is a Hash' do
+    assert subject.configs.kind_of?(Hash)
+  end
   describe 'Password' do
     it 'needs a password on create' do
       subject = build_user(name: 'louis', password: nil)
@@ -33,14 +36,19 @@ describe User do
       subject.password = '1234567'
       refute subject.valid?
     end
+    it 'password must have 8 characters for update' do
+      save_user subject
+      subject.password = '123'
+      refute subject.valid?
+    end
     it 'encrypted password is generated with a uniq salt' do
       ingrid = create_user(name: 'Ingrid', password: subject.password)
       save_user subject
-      subject.encrypted_password.wont_equal ingrid.encrypted_password
+      refute_equal subject.encrypted_password, ingrid.encrypted_password
     end
     it 'password is cleared on save' do
       save_user subject
-      subject.password.must_be_nil
+      assert_nil subject.password
     end
     it 'password remains valid between saves' do
       save_user subject
@@ -51,14 +59,14 @@ describe User do
     it 'encrypted password and salt are cleared when the password changes' do
       save_user subject
       subject.password = 'newpassword'
-      subject.encrypted_password.must_be_nil
-      subject.salt.must_be_nil
+      assert_nil subject.encrypted_password
+      assert_nil subject.salt
     end
     it 'encrypted password and salt are not cleared when the password is set to nil' do
       save_user subject
       subject.password = nil
-      subject.encrypted_password.wont_be_nil
-      subject.salt.wont_be_nil
+      refute_nil subject.encrypted_password
+      refute_nil subject.salt
     end
   end
   it 'authenticates with valid password' do
@@ -116,6 +124,12 @@ describe User do
       subject.destroy
       assert_raises(ActiveRecord::RecordNotFound) { entry.reload }
     end
+    it 'destroys its notifications on destroy' do
+      assert subject.save
+      notification = create_user_notification(user: subject)
+      subject.destroy
+      assert_raises(ActiveRecord::RecordNotFound) { notification.reload }
+    end
   end
 
   describe 'Class methods' do
@@ -125,7 +139,7 @@ describe User do
       louis = create_user(name: 'louis')
       adrien = create_user(name: 'adrien')
       ingrid = create_user(name: 'ingrid')
-      subject.all.must_equal [ adrien, ingrid, louis ]
+      assert_equal [ adrien, ingrid, louis ], subject.all
     end
   end
 end

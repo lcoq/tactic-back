@@ -27,9 +27,6 @@ describe Session do
     subject.password = 'invalid'
     refute subject.valid?
   end
-  it 'name is the user name' do
-    assert_equal user.name, subject.name
-  end
 
   describe 'Class methods' do
     subject { Session }
