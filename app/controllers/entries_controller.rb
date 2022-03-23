@@ -179,6 +179,6 @@ class EntriesController < ApplicationController
 
   def build_csv(entries)
     rounded = index_options && index_options['rounded']
-    EntryCSV.new(entries, rounded: rounded).generate
+    EntryCsv.new(entries, rounded: rounded).generate
   end
 end
