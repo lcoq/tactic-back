@@ -28,6 +28,6 @@ describe Teamwork::TimeEntrySynchronizeJob do
     assert notif
     assert_equal entry, notif.resource
     assert_equal 'error', notif.nature
-    assert_not_empty notif.message
+    refute_empty notif.message
   end
 end
