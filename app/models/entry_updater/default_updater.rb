@@ -12,7 +12,7 @@ module EntryUpdater
     end
 
     def update(attributes)
-      entry.update_attributes attributes
+      entry.update attributes
     end
 
     def destroy

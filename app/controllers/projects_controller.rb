@@ -19,7 +19,7 @@ class ProjectsController < ApplicationController
 
   def create
     @project = Project.new
-    if @project.update_attributes(create_params)
+    if @project.update(create_params)
       render json: @project
     else
       render_record_error @project
@@ -28,7 +28,7 @@ class ProjectsController < ApplicationController
 
   def update
     @project = Project.find(params[:id])
-    if @project.update_attributes(update_params)
+    if @project.update(update_params)
       render json: @project
     else
       render_record_error @project

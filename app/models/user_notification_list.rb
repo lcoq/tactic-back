@@ -31,11 +31,11 @@ class UserNotificationList
     {}
   end
 
-  def update_attributes(attributes)
+  def update(attributes)
     errored = false
     UserNotification.transaction do
       notifications.each do |notification|
-        unless notification.update_attributes(attributes)
+        unless notification.update(attributes)
           errored = true
           raise ActiveRecord::Rollback
         end

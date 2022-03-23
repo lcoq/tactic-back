@@ -29,27 +29,27 @@ describe UserNotificationList do
   it 'has user' do
     assert_equal user, subject.user
   end
-  describe '#update_attributes' do
+  describe '#update' do
     it 'update all notifications attributes' do
       notifs = 3.times.map do
         notif = create_user_notification(user: user)
         notif.update_column :created_at, Time.zone.now - 1.day
         notif
       end
-      assert subject.update_attributes(status: 'read')
+      assert subject.update(status: 'read')
       notifs.map(&:reload)
       assert notifs.all?(&:status_read?)
     end
     it 'does not update notifications on error' do
       notif = create_user_notification(user: user)
       notif.update_column :created_at, Time.zone.now - 1.day
-      refute subject.update_attributes(status: 'invalid')
+      refute subject.update(status: 'invalid')
       refute notif.reload.status_read?
     end
-    it 'has errors after update_attributes error' do
+    it 'has errors after update error' do
       notif = create_user_notification(user: user)
       notif.update_column :created_at, Time.zone.now - 1.day
-      subject.update_attributes(status: 'invalid')
+      subject.update(status: 'invalid')
       refute_empty subject.errors
     end
   end

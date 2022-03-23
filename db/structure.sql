@@ -1,10 +1,3 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 13.0 (Debian 13.0-1.pgdg100+1)
--- Dumped by pg_dump version 13.6 (Debian 13.6-1.pgdg100+1)
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -48,8 +41,8 @@ SET default_table_access_method = heap;
 CREATE TABLE public.ar_internal_metadata (
     key character varying NOT NULL,
     value character varying,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -765,6 +758,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220313093405'),
 ('20220314134033'),
 ('20220316174726'),
-('20220321094812');
+('20220321094812'),
+('20220323133241');
 
 

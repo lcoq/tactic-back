@@ -9,7 +9,7 @@ class UserNotificationListsController < ApplicationController
 
   def update
     @list = UserNotificationList.find_for_user(current_user, params[:id])
-    if @list.update_attributes(update_params)
+    if @list.update(update_params)
       render json: @list, include: 'notifications'
     else
       render_record_error @list
