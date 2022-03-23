@@ -3,8 +3,13 @@ module ValidatableEnum
 
   class_methods do
     def validatable_enum(attribute)
-      decorate_attribute_type(attribute, :enum) do |subtype|
+      block = ->(subtype) do
         ValidatableEnumType.new(attribute, public_send(attribute.to_s.pluralize), subtype)
+      end
+      if method(:decorate_attribute_type).parameters.count == 2
+        decorate_attribute_type(attribute, &block)
+      else
+        decorate_attribute_type(attribute, :enum, &block)
       end
     end
   end

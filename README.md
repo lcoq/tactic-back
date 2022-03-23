@@ -14,5 +14,5 @@ docker-compose build
 ```
 docker-compose up
 docker-compose exec db sh
-pg_restore -U postgres --no-owner -d tactic_development dumps/20220211.dump
+pg_restore -U postgres --no-owner -d web dumps/20220211.dump
 ```
