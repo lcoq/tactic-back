@@ -28,8 +28,7 @@ jobs:
 
     env:
       RAILS_ENV: test
-      PGHOST: localhost
-      PGUSER: postgres
+      DATABASE_URL: postgresql://postgres@localhost/postgres
 
     steps:
       - uses: actions/checkout@v2
