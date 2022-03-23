@@ -28,7 +28,7 @@ jobs:
 
     env:
       RAILS_ENV: test
-      DATABASE_URL: postgresql://postgres@localhost/postgres
+      DATABASE_URL: postgresql://postgres@postgres/postgres
 
     steps:
       - uses: actions/checkout@v2
