@@ -23,5 +23,7 @@ module TacticBack
     #   - https://github.com/rails/rails/issues/23589
     #   - https://github.com/collectiveidea/delayed_job_active_record/issues/128
     config.active_record.belongs_to_required_by_default = true
+
+    config.active_record.schema_format = :sql
   end
 end
