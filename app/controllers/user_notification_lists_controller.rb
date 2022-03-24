@@ -32,7 +32,7 @@ class UserNotificationListsController < ApplicationController
   end
 
   def index_params
-    params.permit('include')
+    params.permit('include', 'user_id')
   end
 
   def update_params
