@@ -182,7 +182,7 @@ describe Entry do
       it 'includes entries without project with project_ids nil' do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis)
-        results = subject.filter(
+        results = subject.filter_with(
           since: entry.started_at.beginning_of_day,
           before: entry.started_at.end_of_day,
           user_ids: [ louis.id.to_s ],
@@ -193,7 +193,7 @@ describe Entry do
       it 'does not include entries without project without project_ids nil' do
         louis = create_user(name: 'louis')
         entry = create_entry(user: louis, project: create_project(name: 'Tactic'))
-        results = subject.filter(
+        results = subject.filter_with(
           since: entry.started_at.beginning_of_day,
           before: entry.started_at.end_of_day,
           user_ids: [ louis.id.to_s ],
@@ -213,7 +213,7 @@ describe Entry do
           create_entry(user: user, title: "tâche après", started_at: since + 1.second, stopped_at: since + 2.seconds),
           create_entry(user: user, title: "avant tâche après", started_at: since + 1.second, stopped_at: since + 2.seconds)
         ]
-        assert_empty(entries - subject.filter(since: since, before: before, query: "tâch"))
+        assert_empty(entries - subject.filter_with(since: since, before: before, query: "tâch"))
       end
       it 'does not include entries not matching query' do
         user = create_user(name: 'louis')
@@ -221,7 +221,7 @@ describe Entry do
         before = Time.zone.now.end_of_day
         create_entry(user: user, title: "un truc qui n'a rien à voir", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "tâc", started_at: since + 1.second, stopped_at: since + 2.seconds)
-        assert_empty subject.filter(since: since, before: before, query: "tâch")
+        assert_empty subject.filter_with(since: since, before: before, query: "tâch")
       end
       it 'includes entries matching OR query' do
         user = create_user(name: 'louis')
@@ -232,7 +232,7 @@ describe Entry do
           create_entry(user: user, title: "à faire", started_at: since + 1.second, stopped_at: since + 2.seconds),
           create_entry(user: user, title: "une tâche à faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
         ]
-        assert_empty(entries - subject.filter(since: since, before: before, query: "tâche | faire"))
+        assert_empty(entries - subject.filter_with(since: since, before: before, query: "tâche | faire"))
       end
       it 'does not include entries not matching OR query' do
         user = create_user(name: 'louis')
@@ -240,7 +240,7 @@ describe Entry do
         before = Time.zone.now.end_of_day
         create_entry(user: user, title: "un truc qui n'a rien à voir", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "tâc", started_at: since + 1.second, stopped_at: since + 2.seconds)
-        assert_empty subject.filter(since: since, before: before, query: "tâche | faire")
+        assert_empty subject.filter_with(since: since, before: before, query: "tâche | faire")
       end
       it 'includes entries matching AND query' do
         user = create_user(name: 'louis')
@@ -249,7 +249,7 @@ describe Entry do
         entries = [
           create_entry(user: user, title: "une tâche qu'il faut faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
         ]
-        assert_empty(entries - subject.filter(since: since, before: before, query: "qu'il faut faire"))
+        assert_empty(entries - subject.filter_with(since: since, before: before, query: "qu'il faut faire"))
       end
       it 'does not include entries not matching OR query' do
         user = create_user(name: 'louis')
@@ -259,7 +259,7 @@ describe Entry do
         create_entry(user: user, title: "il faut", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "une tâche qu'il faut", started_at: since + 1.second, stopped_at: since + 2.seconds)
         create_entry(user: user, title: "faut faire", started_at: since + 1.second, stopped_at: since + 2.seconds)
-        assert_empty subject.filter(since: since, before: before, query: "qu'il faut faire")
+        assert_empty subject.filter_with(since: since, before: before, query: "qu'il faut faire")
       end
     end
   end

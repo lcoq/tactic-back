@@ -8,7 +8,7 @@ class EntriesController < ApplicationController
     if current_week? || current_month?
       @entries = find_entries_in_current_week_or_month
     elsif entry_filters?
-      @entries = Entry.filter(entry_filters).stopped.includes(:project, :user)
+      @entries = Entry.filter_with(entry_filters).stopped.includes(:project, :user)
     else
       @entries = current_user.recent_entries.stopped.includes(:project, :user)
     end

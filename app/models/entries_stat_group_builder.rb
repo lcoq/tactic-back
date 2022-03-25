@@ -13,7 +13,7 @@ class EntriesStatGroupBuilder
   end
 
   def daily(filters)
-    entries_scope = Entry.filter(filters)
+    entries_scope = Entry.filter_with(filters)
     EntriesStatGroup.new(
       id: build_id(filters, "%Y/%m/%d"),
       title: build_title("Hours per day", filters),
@@ -23,7 +23,7 @@ class EntriesStatGroupBuilder
   end
 
   def monthly(filters)
-    entries_scope = Entry.filter(filters)
+    entries_scope = Entry.filter_with(filters)
     EntriesStatGroup.new(
       id: build_id(filters, "%Y/%m"),
       title: build_title("Hours per month", filters),
