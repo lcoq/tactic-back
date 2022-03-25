@@ -4,8 +4,8 @@ module Teamwork
     TASK_URL_REGEXP = /\Ahttps:\/\/([^.]+)\.teamwork\.com\/#\/tasks\/(\d+)\s*\Z/i
     TASK_FORMAT = "[%{domain_alias}/%{task_id}] %{task_title}"
 
-    def self.build(*args)
-      new(*args).build
+    def self.build(*args, **kwargs)
+      new(*args, **kwargs).build
     end
 
     attr_reader :title,

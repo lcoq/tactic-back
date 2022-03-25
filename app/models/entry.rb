@@ -13,7 +13,7 @@ class Entry < ApplicationRecord
   scope :in_current_month, -> { since(Time.zone.now.beginning_of_month) }
   scope :stopped, -> { where.not(stopped_at: nil) }
 
-  scope :filter, ->(h) {
+  scope :filter_with, ->(h) {
     scoped = since(h[:since]).before(h[:before])
     scoped = scoped.where(user_id: h[:user_ids]) if h[:user_ids]
     scoped = scoped.where(project_id: h[:project_ids]) if h[:project_ids]

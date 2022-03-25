@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby "2.5.9"
+ruby "3.0.3"
 
 gem 'rails', '~> 6.1.0'
 
@@ -7,7 +7,7 @@ gem 'rails', '~> 6.1.0'
 gem 'bootsnap', require: false
 
 gem 'pg'
-gem 'puma', '~> 3.12'
+gem 'puma'
 gem 'rack-cors', require: 'rack/cors'
 gem 'active_model_serializers', '~> 0.10.0'
 gem 'httparty'
@@ -20,9 +20,9 @@ group :development, :test do
 end
 
 group :development do
-  gem 'listen', '~> 3.0.5'
+  gem 'listen'
   gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'spring-watcher-listen'
 end
 
 group :test do
