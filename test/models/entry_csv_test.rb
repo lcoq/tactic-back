@@ -93,7 +93,7 @@ describe EntryCsv do
   end
 
   def generate_csv(entries, options = {})
-    generated = EntryCsv.new(entries, options).generate
+    generated = EntryCsv.new(entries, **options).generate
     CSV.parse generated, headers: true
   end
 end
