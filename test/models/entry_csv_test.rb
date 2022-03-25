@@ -1,6 +1,6 @@
 require 'test_helper'
 
-describe EntryCSV do
+describe EntryCsv do
   it 'generates CSV' do
     adrien = create_user(name: 'adrien')
     louis = create_user(name: 'louis')
@@ -93,7 +93,7 @@ describe EntryCSV do
   end
 
   def generate_csv(entries, options = {})
-    generated = EntryCSV.new(entries, options).generate
+    generated = EntryCsv.new(entries, options).generate
     CSV.parse generated, headers: true
   end
 end

@@ -14,7 +14,7 @@ class UsersController < ApplicationController
 
   def update
     @user = current_user
-    if @user.update_attributes(update_params)
+    if @user.update(update_params)
       render json: @user
     else
       render_record_error @user

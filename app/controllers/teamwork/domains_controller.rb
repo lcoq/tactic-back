@@ -9,7 +9,7 @@ module Teamwork
 
     def create
       @domain = Domain.new(user: current_user)
-      if @domain.update_attributes(create_params)
+      if @domain.update(create_params)
         render json: @domain
       else
         render_record_error @domain
@@ -18,7 +18,7 @@ module Teamwork
 
     def update
       @domain = Domain.find(params[:id])
-      if @domain.update_attributes(update_params)
+      if @domain.update(update_params)
         render json: @domain
       else
         render_record_error @domain

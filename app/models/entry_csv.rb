@@ -1,6 +1,6 @@
 require 'csv'
 
-class EntryCSV
+class EntryCsv
   attr_reader :collection, :rounded
 
   def initialize(collection, rounded: false)

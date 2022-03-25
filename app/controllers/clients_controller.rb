@@ -8,7 +8,7 @@ class ClientsController < ApplicationController
 
   def create
     @client = Client.new
-    if @client.update_attributes(create_params)
+    if @client.update(create_params)
       render json: @client
     else
       render_record_error @client
@@ -17,7 +17,7 @@ class ClientsController < ApplicationController
 
   def update
     @client = Client.find(params[:id])
-    if @client.update_attributes(update_params)
+    if @client.update(update_params)
       render json: @client
     else
       render_record_error @client

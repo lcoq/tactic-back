@@ -39,6 +39,7 @@ services:
     volumes:
       - .:/code
     environment:
+      RAILS_ENV: test
       DATABASE_URL: postgresql://postgres@testdb/test
       DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
     env_file:

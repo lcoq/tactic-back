@@ -9,7 +9,7 @@ class UserNotificationListsController < ApplicationController
 
   def update
     @list = UserNotificationList.find_for_user(current_user, params[:id])
-    if @list.update_attributes(update_params)
+    if @list.update(update_params)
       render json: @list, include: 'notifications'
     else
       render_record_error @list
@@ -32,7 +32,7 @@ class UserNotificationListsController < ApplicationController
   end
 
   def index_params
-    params.permit('include')
+    params.permit('include', 'user_id')
   end
 
   def update_params

@@ -46,7 +46,7 @@ jobs:
           bundler-cache: true
 
       - name: Setup DB
-        run: bin/rails db:setup
+        run: bin/rails db:prepare
 
       - name: Run tests
         run: bin/rake test
